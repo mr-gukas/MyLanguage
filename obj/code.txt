@@ -1,0 +1,28 @@
+count nshanakel 10 verj 
+ded   nshanakel 15 verj 
+otec bac pag 
+barev
+	a nshanakel ded gumarats 10 verj
+	b nshanakel 5 verj
+	fuck bac b pag verj
+	veradardz 0 verj 
+ctesutyun
+
+fuck bac n pag
+barev
+	ete bac 2 gumarats 2 pag aysdepkum
+	barev
+		n   nshanakel 5 verj
+		ded nshanakel 30 verj 
+	ctesutyun 
+	hakarak
+	barev
+		n nshanakel 10 verj
+	ctesutyun verj
+
+	t nshanakel 0 verj
+	u nshanakel 5 verj
+
+	veradardz 0 verj 
+ctesutyun
+
