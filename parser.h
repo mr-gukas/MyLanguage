@@ -22,11 +22,23 @@
 		} \
 		if (*curIndex+1 < tokens->nodeCount) (*curIndex)++;
 
-	
+const size_t VAR_COUNT = 30;
+
 struct Tokens_t	
 {
 	TreeNode_t** firstTok;
 	size_t nodeCount;
+
+	char** globVar;
+	char** funcVar;
+	char** localVar;
+};
+
+enum VarDeep
+{
+	GLOBAL = 0,
+	FUNC, 
+	LOCAL,
 };
 
 struct MemDefender_t
@@ -55,5 +67,9 @@ static TreeNode_t* GetN(Tokens_t* tokens, size_t* curIndex);
 static OperationType GetOpType(const char* name);
 static void TokensDtor(Tokens_t* tokens, MemDefender_t* memdef);
 static void MemDefenderCtor(MemDefender_t* memdef, size_t size);
+static TreeNode_t* GetDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+static TreeNode_t* GetRet(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+static TreeNode_t* GetIf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+static TreeNode_t* GetWhile(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
 
 

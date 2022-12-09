@@ -84,6 +84,7 @@ enum NodeType
 	Type_CALL,
 	Type_COMMA,
 	Type_STAT,
+	Type_DEF,
 };
 
 enum OperationType

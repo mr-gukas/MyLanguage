@@ -1,10 +1,12 @@
-count nshanakel 10 verj 
-ded   nshanakel 15 verj 
+axper count nshanakuma 10 verj 
+axper ded nshanakuma 15 verj 
 otec bac pag 
 barev
-	a nshanakel ded gumarats 10 verj
-	b nshanakel 5 verj
-	fuck bac b pag verj
+	axper a nshanakuma ded gumarats 10 verj
+	axper b nshanakuma 5 verj
+
+	a nshanakuma fuck bac b pag verj
+
 	veradardz 0 verj 
 ctesutyun
 
@@ -12,16 +14,16 @@ fuck bac n pag
 barev
 	ete bac 2 gumarats 2 pag aysdepkum
 	barev
-		n   nshanakel 5 verj
-		ded nshanakel 30 verj 
+		n   nshanakuma 5 verj
+		ded nshanakuma 30 verj 
 	ctesutyun 
 	hakarak
 	barev
-		n nshanakel 10 verj
+		n nshanakuma 10 verj
 	ctesutyun verj
 
-	t nshanakel 0 verj
-	u nshanakel 5 verj
+	axper t nshanakuma 0 verj
+	axper u nshanakuma 5 verj
 
 	veradardz 0 verj 
 ctesutyun

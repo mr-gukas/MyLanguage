@@ -27,6 +27,7 @@ int main(const int argc, const char* argv[])
 
 	fclose(code);
 
+
 #ifdef LOG_MODE
     endLog(LogFile);
 #endif
@@ -183,6 +184,13 @@ static NodeType GetType(const char* word)
 
 static TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	if ((*(tokens->firstTok + *curIndex))->type != Type_FUNC && 
+		(*(tokens->firstTok + *curIndex))->type != Type_DEF)
+	{
+		fprintf(stderr, "False expression encountered. A variable or function declaration was expected (line %lu)\n", (*(tokens->firstTok + *curIndex))->lineIndex);
+		abort();
+	}
+
 	TreeNode_t* node1 = GetAssign(tokens, curIndex, memdef);
 	
 	if (!node1)
@@ -192,7 +200,6 @@ static TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* me
 	}
 	
 	SYNTAXCTRL("verj");
-
 	TreeNode_t* stat1 = MakeNode(Type_STAT, Op_Null, 0, "ST", NULL, NULL);
 	memdef->adr[(memdef->size)++] = stat1;
 
@@ -201,7 +208,7 @@ static TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* me
 	stat1->left   = node1;
 	node1->parent = stat1;
 		
-	while ((*(tokens->firstTok + *curIndex))->type == Type_VAR)
+	while ((*(tokens->firstTok + *curIndex))->type == Type_DEF)
 	{
 		TreeNode_t* node2 = GetAssign(tokens, curIndex, memdef);
 		SYNTAXCTRL("verj");
@@ -218,6 +225,12 @@ static TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* me
 		stat1 = stat2;
 	}
 	
+	if ((*(tokens->firstTok + *curIndex))->type != Type_FUNC)
+	{
+		fprintf(stderr, "False expression encountered A variable or function declaration was expected (line %lu)\n", (*(tokens->firstTok + *curIndex))->lineIndex);
+		abort();
+	}
+
 	TreeNode_t* nodeFunc = GetFunc(tokens, curIndex, memdef);
 	stat1->right = nodeFunc;
 	nodeFunc->parent = stat1;
@@ -245,7 +258,7 @@ static TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* me
 
 	stat->left      = funcDef;
 	funcDef->parent = stat;
-	 
+
 	while ((*(tokens->firstTok + *curIndex))->type == Type_FUNC)
 	{
         TreeNode_t* funcDef2 = GetFuncDef(tokens, curIndex, memdef);
@@ -259,6 +272,8 @@ static TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* me
         funcDef->parent  = stat;
 
         stat = stat2;
+
+		if (*curIndex + 1 >= tokens->nodeCount) break;
     }
 
     return stat;
@@ -352,22 +367,31 @@ static TreeNode_t* GetAssign(Tokens_t* tokens, size_t* curIndex, MemDefender_t* 
 {
 	TreeNode_t* node1 = GetE(tokens, curIndex, memdef);
 	
-	if (STR_EQ("nshanakel", (*(tokens->firstTok + *curIndex))->name))
+	if (STR_EQ("nshanakuma", (*(tokens->firstTok + *curIndex))->name))
 	{
+
 		if ((*(tokens->firstTok + *curIndex - 1))->type != Type_VAR)
 		{
 			assert(0 && "Syntax Error");
 		}
 
-		TreeNode_t* oper = *(tokens->firstTok + *curIndex);
+		TreeNode_t* oper = NULL;
+		if (node1->type == Type_DEF)
+		{
+			oper = node1;
+		}
+		else
+		{
+			oper = *(tokens->firstTok + *curIndex);
+			oper->left = node1;
+			node1->parent = oper;
+		}
 
 		(*curIndex)++;
 		
 		TreeNode_t* init = GetE(tokens, curIndex, memdef);
 
-		oper->left  = node1;
 		oper->right = init;
-		node1->parent = oper;
 		init->parent  = oper;
 
 		node1 = oper;
@@ -451,12 +475,13 @@ static TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memde
 	if (STR_EQ("bac", (*(tokens->firstTok + *curIndex))->name))
 	{
 		(*curIndex)++;
-
 		TreeNode_t* exp = GetE(tokens, curIndex, memdef);
-
 		SYNTAXCTRL("pag");
-		
 		return exp;
+	}
+	else if (STR_EQ("axper", (*(tokens->firstTok + *curIndex))->name))
+	{
+		return GetDef(tokens, curIndex, memdef);
 	}
 	else if ((*(tokens->firstTok + *curIndex))->type == Type_VAR)
 	{
@@ -464,93 +489,20 @@ static TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memde
 	}
 	else if ((*(tokens->firstTok + *curIndex))->type == Type_RETURN)
 	{
-		TreeNode_t* ret = 	*(tokens->firstTok + *curIndex);
-
-		if (STR_EQ("verj", (*(tokens->firstTok + *curIndex + 1))->name))
-		{
-			return ret;
-		}
-
-		(*curIndex)++;
-
-		TreeNode_t* retArg = GetE(tokens, curIndex, memdef);
-
-		ret->left      = retArg;
-		retArg->parent = ret;
-		
-		return ret;
+		return GetRet(tokens, curIndex, memdef);;
 	}
 	else if ((*(tokens->firstTok + *curIndex))->type == Type_FUNC && !STR_EQ("otec", (*(tokens->firstTok + *curIndex))->name))
 	{
-		TreeNode_t* call = GetCall(tokens, curIndex, memdef);
-
-		return call;
+		return GetCall(tokens, curIndex, memdef);;
 	}
 	else if (STR_EQ("ete", (*(tokens->firstTok + *curIndex))->name))
 	{
-		TreeNode_t* ifNode = *(tokens->firstTok + *curIndex);
-		(*curIndex)++;
-
-		SYNTAXCTRL("bac");
-		TreeNode_t* ifCond = GetCond(tokens, curIndex, memdef);
-		SYNTAXCTRL("pag");
-		SYNTAXCTRL("aysdepkum");
-
-		SYNTAXCTRL("barev");
-		TreeNode_t* ifStat = GetStat(tokens, curIndex, memdef);
-		SYNTAXCTRL("ctesutyun");
-		*curIndex -= 2;
-		SYNTAXCTRL("verj");
-		*curIndex += 1;
-
-		ifNode->left   = ifCond;
-		ifCond->parent = ifNode;
-		
-		if (STR_EQ("hakarak", (*(tokens->firstTok + *curIndex))->name))
-		{
-			TreeNode_t* elseNode = *(tokens->firstTok + *curIndex);
-			(*curIndex)++;
-			SYNTAXCTRL("barev");
-			TreeNode_t* elseStat = GetStat(tokens, curIndex, memdef);
-			SYNTAXCTRL("ctesutyun");
-			*curIndex -= 2;
-			SYNTAXCTRL("verj");
-			*curIndex += 1;	
-
-			elseNode->left   = ifStat;
-			ifStat->parent   = elseNode;
-			elseNode->right  = elseStat;
-			elseStat->parent = elseNode;
-			ifNode->right    = elseNode;
-			elseNode->parent = ifNode;
-		}
-		else
-		{
-			ifNode->right  = ifStat;
-			ifStat->parent = ifNode;
-		}
-		
-		return ifNode;
+		return GetIf(tokens, curIndex, memdef);
 	}
 
 	else if (STR_EQ("kani", (*(tokens->firstTok + *curIndex))->name))
 	{
-		TreeNode_t* whileNode = *(tokens->firstTok + *curIndex);
-		
-		SYNTAXCTRL("bac");
-		TreeNode_t* whileCond = GetCond(tokens, curIndex, memdef);
-		SYNTAXCTRL("pag");
-
-		SYNTAXCTRL("barev");
-		TreeNode_t* whileStat = GetStat(tokens, curIndex, memdef);
-		SYNTAXCTRL("ctesutyun");
-
-		whileNode->left   = whileCond;
-		whileCond->parent = whileNode;
-		whileNode->right  = whileStat;
-		whileStat->parent = whileNode;
-
-		return whileNode;
+		return GetWhile(tokens, curIndex, memdef);
 	}
 	else 
 	{
@@ -558,6 +510,114 @@ static TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memde
 	}
 }
 
+static TreeNode_t* GetWhile(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+{
+	TreeNode_t* whileNode = *(tokens->firstTok + *curIndex);
+	
+	SYNTAXCTRL("bac");
+	TreeNode_t* whileCond = GetCond(tokens, curIndex, memdef);
+	SYNTAXCTRL("pag");
+
+	SYNTAXCTRL("barev");
+	TreeNode_t* whileStat = GetStat(tokens, curIndex, memdef);
+	SYNTAXCTRL("ctesutyun");
+
+	whileNode->left   = whileCond;
+	whileCond->parent = whileNode;
+	whileNode->right  = whileStat;
+	whileStat->parent = whileNode;
+
+	return whileNode;
+}
+
+static TreeNode_t* GetIf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+{
+	TreeNode_t* ifNode = *(tokens->firstTok + *curIndex);
+	(*curIndex)++;
+
+	SYNTAXCTRL("bac");
+	TreeNode_t* ifCond = GetCond(tokens, curIndex, memdef);
+	SYNTAXCTRL("pag");
+	SYNTAXCTRL("aysdepkum");
+
+	SYNTAXCTRL("barev");
+	TreeNode_t* ifStat = GetStat(tokens, curIndex, memdef);
+	SYNTAXCTRL("ctesutyun");
+	*curIndex -= 2;
+	SYNTAXCTRL("verj");
+	*curIndex += 1;
+
+	ifNode->left   = ifCond;
+	ifCond->parent = ifNode;
+	
+	if (STR_EQ("hakarak", (*(tokens->firstTok + *curIndex))->name))
+	{
+		TreeNode_t* elseNode = *(tokens->firstTok + *curIndex);
+		(*curIndex)++;
+		SYNTAXCTRL("barev");
+		TreeNode_t* elseStat = GetStat(tokens, curIndex, memdef);
+		SYNTAXCTRL("ctesutyun");
+		*curIndex -= 2;
+		SYNTAXCTRL("verj");
+		*curIndex += 1;	
+
+		elseNode->left   = ifStat;
+		ifStat->parent   = elseNode;
+		elseNode->right  = elseStat;
+		elseStat->parent = elseNode;
+		ifNode->right    = elseNode;
+		elseNode->parent = ifNode;
+	}
+	else
+	{
+		ifNode->right  = ifStat;
+		ifStat->parent = ifNode;
+	}
+
+	return ifNode;
+}
+
+
+static TreeNode_t* GetRet(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+{
+	TreeNode_t* ret = *(tokens->firstTok + *curIndex);
+
+	if (STR_EQ("verj", (*(tokens->firstTok + *curIndex + 1))->name))
+	{
+		return ret;
+	}
+
+	(*curIndex)++;
+
+	TreeNode_t* retArg = GetE(tokens, curIndex, memdef);
+
+	ret->left      = retArg;
+	retArg->parent = ret;
+	
+	return ret;
+}
+
+
+static TreeNode_t* GetDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+{
+		TreeNode_t* defNode = *(tokens->firstTok + *curIndex);
+
+		if ((*(tokens->firstTok + *curIndex + 1))->type != Type_VAR && (*(tokens->firstTok + *curIndex + 2))->type != Type_ASSIGN)
+		{
+			fprintf(stderr, "_VAR_ERR_: Wrong variable declaration in %lu\n", (*(tokens->firstTok + *curIndex))->lineIndex);
+			abort();
+		}
+
+		(*curIndex)++;
+
+		TreeNode_t* varName = *(tokens->firstTok + *curIndex);
+		defNode->left   = varName;
+		varName->parent = defNode;
+
+		(*curIndex)++;
+
+		return defNode;
+}
 
 static TreeNode_t* GetCall(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
