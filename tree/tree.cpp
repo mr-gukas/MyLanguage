@@ -180,16 +180,17 @@ int NodeDump(TreeNode_t* node, int* nodeCount, FILE* file)
 
 	fprintf(file, "\"node%d\" [fillcolor=", *nodeCount);
 	
-	switch (node->type)
-	{
-		case Type_OP:   fprintf(file, "\"#AADEE2\", label=\""); break;
-		case Type_VAR:  fprintf(file, "\"#FFB2D0\", label=\"");   break;
-		case Type_NUM:  fprintf(file, "\"#98FF98\", label=\"");   break;
-		case Type_STAT: fprintf(file, "\"#C0C0C0\", label=\""); break;
+	if       (node->type == Type_OP)				fprintf(file, "\"#AADEE2\", label=\"");
+	else if  (node->type == Type_VAR)				fprintf(file, "\"#FFB2D0\", label=\"");
+	else if  (node->type == Type_NUM)				fprintf(file, "\"#98FF98\", label=\"");
+	else if  (node->type == Type_STAT)				fprintf(file, "\"#C0C0C0\", label=\"");
+	else if  (node->parent->type == Type_FUNC)		fprintf(file, "\"#0BDA51\", label=\"");
+	else if  (node->type == Type_DEF || node->type == Type_ASSIGN) fprintf(file, "\"#FD5E53\", label=\"");
+	else if  (node->type == Type_RETURN)				fprintf(file, "\"#7851A9\", label=\"");
+	else if  (node->type == Type_OP)				fprintf(file, "\"#AADEE2\", label=\"");
 
-		default: fprintf(file, "\"#EFAF8C\", label=\"");
-	}
-	
+	else fprintf(file, "\"#EFAF8C\", label=\"");
+
 	if (node->type == Type_OP)
 	{
 		switch (node->opVal)
@@ -220,12 +221,12 @@ int NodeDump(TreeNode_t* node, int* nodeCount, FILE* file)
 
 	if (node->left != NULL)
 	{
-		fprintf(file, "\"node%d\" -- \"node%d\"\n", *nodeCount, leftNum);
+		fprintf(file, "\"node%d\" -- \"node%d\"[label=\"L\"]\n", *nodeCount, leftNum);
 	}
 	
 	if (node->right != NULL)
 	{
-		fprintf(file, "\"node%d\" -- \"node%d\"\n", *nodeCount, rightNum);
+		fprintf(file, "\"node%d\" -- \"node%d\"[label=\"R\"]\n", *nodeCount, rightNum);
 	}
 	
 	++(*nodeCount);
@@ -316,4 +317,5 @@ int TreeUpdate(Tree_t* tree, TreeNode_t* node)
 
 	return 0;
 }
+
 

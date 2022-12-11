@@ -22,7 +22,9 @@ int main(const int argc, const char* argv[])
 	TreeUpdate(&tree, tree.root);
 	
 	TreeDump(&tree);
-	
+
+	WriteAsmCode(tree.root);
+
 	TokensDtor(&tokens, &memdef);
 
 	fclose(code);
@@ -64,6 +66,11 @@ static void GetTokens(Tokens_t* tokens, FILE* code)
 		if (isspace(*dataptr))
 		{
 			SkipSpaces(&dataptr, &lineIndex);
+		}
+		else if (*dataptr == '#')
+		{
+			SkipComments(&dataptr);
+			lineIndex++;
 		}
 		else if (isdigit(*dataptr))
 		{
@@ -148,6 +155,15 @@ static char* SkipSpaces(char** src, size_t* lineIndex)
 	return *src;
 }
 
+static char* SkipComments(char** src)
+{
+	while (**src != '\n')
+	{
+		++(*src);
+	}
+
+	return *src + 1;
+}
 static size_t GetWord(char *dest, const char *src) 
 {
     size_t wordLen = 0;
@@ -491,7 +507,7 @@ static TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memde
 	{
 		return GetRet(tokens, curIndex, memdef);;
 	}
-	else if ((*(tokens->firstTok + *curIndex))->type == Type_FUNC && !STR_EQ("otec", (*(tokens->firstTok + *curIndex))->name))
+	else if ((*(tokens->firstTok + *curIndex))->type == Type_FUNC && !STR_EQ("main", (*(tokens->firstTok + *curIndex))->name))
 	{
 		return GetCall(tokens, curIndex, memdef);;
 	}
@@ -513,7 +529,8 @@ static TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memde
 static TreeNode_t* GetWhile(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
 	TreeNode_t* whileNode = *(tokens->firstTok + *curIndex);
-	
+	(*curIndex)++;
+
 	SYNTAXCTRL("bac");
 	TreeNode_t* whileCond = GetCond(tokens, curIndex, memdef);
 	SYNTAXCTRL("pag");

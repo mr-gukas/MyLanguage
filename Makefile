@@ -2,4 +2,4 @@ CPPFLAGS := -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-
 
 
 all:
-	g++ $(CPPFLAGS)  parser.cpp filework/filework.cpp tree/tree.cpp log/LOG.cpp -o parser
+	g++ $(CPPFLAGS)  parser.cpp filework/filework.cpp tree/tree.cpp backend/backend.cpp backend/stack/stack.cpp log/LOG.cpp -o parser

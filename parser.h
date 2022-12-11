@@ -8,6 +8,8 @@
 #include "filework/filework.h"
 #include "tree/tree.h"
 #include "dsl.h"
+#include "backend/backend.h"
+
 
 #define STR_EQ(str1, str2) (strncmp (str1, str2, strlen (str1)) == 0)
 
@@ -71,5 +73,6 @@ static TreeNode_t* GetDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* mem
 static TreeNode_t* GetRet(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
 static TreeNode_t* GetIf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
 static TreeNode_t* GetWhile(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+static char* SkipComments(char** src);
 
 

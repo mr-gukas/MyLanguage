@@ -2,7 +2,7 @@
 
 FILE* startLog(FILE* LogFile)
 {
-    LogFile = fopen(PRINT_FILE, "w+");
+    LogFile = fopen(PRINT_FILE, "a+");
 
     fprintf(LogFile, "<pre>\n");
     fprintf(LogFile, "<p style=\"font-size:20px\">\n");
