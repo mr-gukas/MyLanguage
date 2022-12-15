@@ -85,6 +85,8 @@ enum NodeType
 	Type_COMMA,
 	Type_STAT,
 	Type_DEF,
+	Type_PRINTF,
+	Type_SCANF,
 };
 
 enum OperationType

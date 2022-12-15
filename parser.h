@@ -24,8 +24,6 @@
 		} \
 		if (*curIndex+1 < tokens->nodeCount) (*curIndex)++;
 
-const size_t VAR_COUNT = 30;
-
 struct Tokens_t	
 {
 	TreeNode_t** firstTok;
@@ -49,30 +47,31 @@ struct MemDefender_t
 	size_t		size;
 };
 
-static void GetTokens(Tokens_t* tokens, FILE* code);
-static char* SkipSpaces(char** src, size_t* lineIndex);
-static size_t GetWord(char *dest, const char *src);
-static NodeType GetType(const char* word);
-static TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetFuncDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetAssign(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetE(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetT(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetPow(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetCall(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetCond(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetStat(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetN(Tokens_t* tokens, size_t* curIndex);
-static OperationType GetOpType(const char* name);
-static void TokensDtor(Tokens_t* tokens, MemDefender_t* memdef);
-static void MemDefenderCtor(MemDefender_t* memdef, size_t size);
-static TreeNode_t* GetDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetRet(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetIf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static TreeNode_t* GetWhile(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
-static char* SkipComments(char** src);
+ void GetTokens(Tokens_t* tokens, FILE* code);
+ char* SkipSpaces(char** src, size_t* lineIndex);
+ size_t GetWord(char *dest, const char *src);
+ NodeType GetType(const char* word);
+ TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetFuncDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetAssign(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetE(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetT(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetPow(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetCall(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetCond(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetStat(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetN(Tokens_t* tokens, size_t* curIndex);
+ OperationType GetOpType(const char* name);
+ void TokensDtor(Tokens_t* tokens, MemDefender_t* memdef);
+ void MemDefenderCtor(MemDefender_t* memdef, size_t size);
+ TreeNode_t* GetDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetRet(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetIf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetWhile(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ char* SkipComments(char** src);
 
-
+ TreeNode_t* GetPrintf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);
+ TreeNode_t* GetScanf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);

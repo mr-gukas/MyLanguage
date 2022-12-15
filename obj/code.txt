@@ -1,44 +1,24 @@
 #Armenian language
 
-axper count nshanakuma 10 verj 
-axper ded nshanakuma 15 verj 
-
 main bac pag 
 barev
-	axper a nshanakuma ded gumarats 10 verj
-	axper b nshanakuma 5 verj
+	axper vova nshanakuma 0 verj
+	cardacek bac vova pag verj
+	axper vitya nshanakuma fuck bac vova pag verj
+	tpek bac vitya pag verj
 
-	a nshanakuma fuck bac b pag verj
-	
-	kani bac n hanats a pag
-	barev
-		a nshanakuma a gumarats 5 verj
-	ctesutyun verj
-
-	veradardz 0 verj 
-
+	veradardz 0 verj
 ctesutyun
 
-vova bac vov pag
+fuck bac num pag 
 barev
-	veradardz 25 verj
-ctesutyun
-
-fuck bac n storaket b pag
-barev
-	ete bac 2 gumarats 2 pag aysdepkum
+	ete bac num hanats 1 pag aysdepkum
 	barev
-		n   nshanakuma 5 verj
-		ded nshanakuma 30 verj 
-	ctesutyun 
+		axper new nshanakuma num hanats 1 verj
+		veradardz fuck bac new pag basmapatkel num verj
+	ctesutyun
 	hakarak
 	barev
-		n nshanakuma 10 verj
+		veradardz 1 verj
 	ctesutyun verj
-
-	axper t nshanakuma 0 verj
-	axper u nshanakuma 5 verj
-
-	veradardz 0 verj 
 ctesutyun
-

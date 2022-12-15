@@ -2,13 +2,14 @@
 
 int WriteAsmCode(TreeNode_t* root)
 {
-	//fprintf(asmCode, "CALL :main\n");
-	//fprintf(asmCode, "HLT\n");
-	
+	assert(root); 
+
 	Program_t program = {};
 	ProgramCtor(&program, root);
 	
 	TreetoAsm(&program);
+
+	fclose(program.asmFile);
 
 	return 0;
 }
@@ -22,9 +23,11 @@ int ProgramCtor(Program_t* program, TreeNode_t* node)
 	program->ifCounter    = 0;
 	program->whileCounter = 0;
 	
-	Stack_t tabStk = {};
-	StackCtor(&tabStk, 10);
-	
+	program->tabStk = (Stack_t*) calloc(1, sizeof(Stack_t));	
+	StackCtor(program->tabStk, 10);
+
+	program->funcArr = FuncArrCtor();
+
 	FILE* asmCode    = fopen("obj/arm.asm", "w+");
 	program->asmFile = asmCode;
 
@@ -35,93 +38,207 @@ int TreetoAsm(Program_t* program)
 {
 	if (program == NULL) return WRONG_DATA;
 	
-	TreeNode_t* curNode = program->node;
+	ParseStatement(program->node, program);
 
-	if (curNode->left->type != Type_FUNC)
+//TODO 	PROGRAM_DTOR();
+
+	for (size_t index = 0; index < program->tabStk->size; index++)
 	{
-		size_t glCounter = 0;
-		VarsCount(curNode, &glCounter);
-		
-		VarTable_t globVars = {};
-		CreateVarTable(&globVars, glCounter);
-		FillVarTable(&globVars, curNode);
+		VarTableDtor(program->tabStk->data[index]);
 	}
 
-	if (program->node->left->type = Type_DEF)
-	{
-		TreeNode_t* curNode = program->node;
-		size_t	  glCounter = 0;
-		while (curNode->left->type == Type_DEF)
-		{
-			glCounter++;
-			curNode = curNode->right;
-		}
-	
-		Variable_t* globVar = CreateVarTable(glCounter);
-		FillVarTable(globVar, node, progtam->tabStk); 
-	}
-		
+	StackDtor(program->tabStk);	
+	FuncArrDtor(program->funcArr);
+	free(program->tabStk);
+
 	return OK;
-}
-
-static void CreateVarTable(VarTable_t* table, size_t size)
-{
-	table->arr = (Variable_t*) calloc(size, sizeof(Variable_t));
-	return table;
 }
 
 void ParseStatement(TreeNode_t* node, Program_t* program)
 {
+	assert(node && program);
+
 	assert(node->type == Type_STAT);
 
+		
+	VarTable_t* oldTable = NULL;
+
+	if (program->tabStk->size != 0)
+		oldTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
+
+	if (program->tabStk->size != 0 && (node->parent && node->parent->type != Type_FUNC))
+	{
+		fprintf(program->asmFile, "PUSH RAX\n"
+								  "PUSH %lu\n"
+								  "ADD\n"
+								  "POP RAX\n\n", oldTable->size);
+	}
+
 	VarTable_t* newTable = NULL;
-
-	if (node->parent && node->parent != Type_FUNC)
-		newTable = VarTableCtor(program->tabStk);
-
-	TreeNode_t* curNode = node;
 	
+	if (!node->parent || (node->parent && node->parent->type != Type_FUNC))
+	{
+		newTable = VarTableCtor(program->tabStk);
+	}
+	
+	TreeNode_t* curNode = node;
+	int firstFunc       = 0;	
+	int isRet           = 1;
 	while (curNode)
 	{
-		switch(node->left)
+		if (curNode->left->type == Type_FUNC && !firstFunc)
 		{
-			case Type_DEF:    ParseDef   (node->left, program); break;
-			case Type_ASSIGN: ParseAssign(node->left, program); break;
-			case Type_FUNC:	  ParseFunc  (node->left, program); break;
-			case Type_CALL:   ParseCall  (node->left, program); break;
-			case Type_IF:     ParseIf    (node->left, program); break;
-			case Type_WHILE:  ParseWhile (node->left, program); break;
-			case Type_RETURN: ParseRet   (node->left, program); break;
+			fprintf(program->asmFile, "CALL :main\n"
+									  "HLT\n");
+			firstFunc = 1;
+		}
+
+		switch(curNode->left->type)
+		{
+			case Type_DEF:    ParseDef    (curNode->left, program); break;
+			case Type_ASSIGN: ParseAssign (curNode->left, program); break;
+			case Type_FUNC:	  ParseFunc   (curNode->left, program); break;
+			case Type_PRINTF: ParsePrintf (curNode->left->left, program); break;
+			case Type_SCANF:  ParseScanf  (curNode->left->left, program); break;
+			case Type_CALL:   ParseCall   (curNode->left, program); break;
+			case Type_IF:     ParseIf     (curNode->left, program); break;
+			case Type_WHILE:  ParseWhile  (curNode->left, program); break;
+			case Type_RETURN: isRet = 1; ParseRet (curNode->left, program); break;
 
 			default: abort(); 
 		}
-
+		
 		curNode = curNode->right;
 	}
+
+	if (!isRet && program->tabStk->size != 0 && (node->parent && node->parent->type != Type_FUNC))
+	{
+		fprintf(program->asmFile, "PUSH RAX\n"
+								  "PUSH %lu\n"
+								  "SUB\n"
+								  "POP RAX\n\n", oldTable->size);
+	}
+
+	
 }
 
-static int ParseFunc(TreeNode_t* node, Program_t* program)
+int ParseFunc(TreeNode_t* node, Program_t* program)
 {
-	fprintf(program->asmFile, "%s:\n", node->left->name);
+	for (size_t index = 0; index < program->funcCount; index++)
+	{
+		if (STR_EQ((program->funcArr[index]).name, node->left->name))
+		{
+			return ALREADY_DEF_FUNC;
+		}
+	}
 
+	(program->funcArr[program->funcCount]).name = node->left->name;
+	
+	fprintf(program->asmFile, "\n%s:\n", node->left->name);
+	
 	VarTable_t* newTable = VarTableCtor(program->tabStk);
-
+	
 	if (node->left->left)
-		ParseParams(node->left->left, newTable);
-		
+		(program->funcArr[program->funcCount]).parCount = ParseParams(node->left->left, newTable);
+	
+
+	program->funcCount++;
 	ParseStatement(node->right, program);
-	
+
 	VarTableDtor(newTable);
-	StackPop(program->stk);			
+	StackPop(program->tabStk);			
 	
-	VarTable_t* curTable = GetTableFromStk(stk, stk->size - 1);
-	fprintf(program->asmFile, "PUSH %lu\n", curTable->raxPos);
-	fprintf(program->asmFile, "POP RAX\n");	
+	return OK;
+}
+
+int VarTableDtor(VarTable_t* table)
+{
+	free(table->arr);
+	free(table);
 
 	return OK;
 }
 
-static VarTable_t* VarTableCtor(Stack_t* stk)
+Func_t* FuncArrCtor()
+{
+	Func_t* funcArr = (Func_t*) calloc(FUNC_COUNT, sizeof(Func_t));
+	
+	return funcArr; 
+}
+
+int FuncArrDtor(Func_t* funcArr)
+{
+	free(funcArr);
+
+	return OK;
+}
+
+int ParseCall(TreeNode_t* node, Program_t* program)
+{
+	int isDefFunc    = 0;
+	size_t funcParam = 0;
+	size_t callParam = 0;
+	
+
+	for (size_t index = 0; index < program->funcCount; index++)
+	{
+		if (STR_EQ((program->funcArr[index]).name, node->left->name))
+		{
+			isDefFunc = 1; 
+			funcParam = (program->funcArr[index]).parCount;
+			break;	
+		}
+	}
+	
+	if (!isDefFunc)
+	{
+		UNDEF_FUNC(node->left);
+	}
+
+	
+	if (node->left->left)
+		callParam = CountParams(node->left->left);
+	
+	if (funcParam != callParam)
+	{
+		return BAD_CALL;
+	}
+	
+	VarTable_t* curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
+	fprintf(program->asmFile, "\nPUSH RAX\n"
+							  "PUSH %lu\n"
+							  "ADD\n"
+							  "POP RAX\n", curTable->size);
+
+	for (int index = (int) callParam - 1; index >= 0; index--)
+	{
+		fprintf(program->asmFile, "POP [%d+RAX]\n", index);
+	}
+
+	fprintf(program->asmFile, "\nCALL :%s\n"
+							  "\nPUSH RAX\n"
+							  "PUSH %lu\n"
+							  "SUB\n"
+							  "POP RAX\n", node->left->name, curTable->size);
+
+	return OK;
+}
+
+size_t CountParams(TreeNode_t* node)
+{
+	TreeNode_t* curNode = node;
+	size_t parCount = 0;
+
+	while (curNode)
+	{
+		parCount++;
+		curNode = curNode->right;
+	}
+
+	return parCount;
+}
+
+VarTable_t* VarTableCtor(Stack_t* stk)
 {
 	VarTable_t* newTable = (VarTable_t*) calloc(1, sizeof(VarTable_t));
 
@@ -139,76 +256,121 @@ static VarTable_t* VarTableCtor(Stack_t* stk)
 	return newTable;
 }
 
-static int ParseParams(TreeNode_t* node, VarTable_t* table)
+size_t ParseParams(TreeNode_t* node, VarTable_t* table)
 {
 	TreeNode_t* curNode = node;
-	
+	size_t parCount = 0;
+
 	while (curNode)
 	{
+		parCount++;
+
 		Variable_t param = {};
-		param->name      = curNode->left->name;
-		param->pos       = table->size;
-		table->arr[size] = param;
+		param.name      = curNode->left->name;
+		param.pos       = table->size;
+		table->arr[table->size] = param;
 
 		table->size++;
 		curNode = curNode->right;
 	}
 
+	return parCount;
+}
+
+int ParsePrintf(TreeNode_t* node, Program_t* program)
+{
+	TreeNode_t* curNode = node;
+	while (curNode)
+	{
+		if (!CheckForVar(node->left, program->tabStk))
+		{
+			UNDEF_VAR(node->left);
+		}
+		
+		int varPos = GetVarPos(node->left, program->tabStk);
+		fprintf(program->asmFile, "PUSH [%d+RAX]\n" 
+								  "OUT\n", varPos);
+
+		curNode = curNode->right;
+	}
+	
 	return OK;
 }
 
-static int ParseDef(TreeNode_t* node, Program_t* program)
+int ParseScanf(TreeNode_t* node, Program_t* program)
 {
-	if (!CheckForVars(node->right, program->tabStk))
+	TreeNode_t* curNode = node;
+	while (curNode)
 	{
-		return UNDEF_VAR;
+		if (!CheckForVar(node->left, program->tabStk))
+		{
+			UNDEF_VAR(node->left);
+		}
+		
+		int varPos = GetVarPos(node->left, program->tabStk);
+		fprintf(program->asmFile, "INP\n" 
+								  "POP [%d+RAX]\n", varPos);
+
+		curNode = curNode->right;
+	}
+	
+	return OK;
+}	
+
+int ParseDef(TreeNode_t* node, Program_t* program)
+{
+	if (!CheckForVar(node->right, program->tabStk))
+	{
+		UNDEF_VAR(node->right);
 	}
 
 	if (CheckForVar(node->left, program->tabStk))
 	{
-		return ALREADY_DEF_VAR;
+		ALREADY_DEF_VAR(node->left);
 	}
 	
-	Variable_t* newVar   = (Variable_t*) calloc(1, sizeof(Variable_t));
+	Variable_t newVar  = {}; 
 	VarTable_t* curTable = GetTableFromStk(program->tabStk,  program->tabStk->size - 1);
 
-	newVar->name       = node->left->name;
-	newVar->pos        = curTable->size;
+	newVar.name       = node->left->name;
+	newVar.pos        = curTable->size;
 		
 	curTable->arr[curTable->size] = newVar;
 	curTable->size += 1;
-	
+		
 	CountExpression(node->right, program);
-	fprintf(program->asmFile, "POP [%lu+RAX]\n", newVar->pos);
+	fprintf(program->asmFile, "//%s\n", node->left->name);
+	fprintf(program->asmFile, "POP [%lu+RAX]\n\n", newVar.pos);
 	
 	return OK;
 }
 
-static int ParseAssign(TreeNode_t* node, Program_t* program)
+int ParseAssign(TreeNode_t* node, Program_t* program)
 {
-	if (!CheckForVars(node->right, program->tabStk))
+	if (!CheckForVar(node->right, program->tabStk))
 	{
-		return UNDEF_VAR;
+		UNDEF_VAR(node->right);
 	}
-
+	
 	if (!CheckForVar(node->left, program->tabStk))
 	{
-		return UNDEF_VAR;
+		UNDEF_VAR(node->left);
 	}
 	
-	size_t pos = GetVarPos(node->left, program->tabStk);
-	CountExperssion(node->right, program);
+	int pos = GetVarPos(node->left, program->tabStk);
+	CountExpression(node->right, program);
 	
-	fprintf(program->asmFile, "POP [%lu+RAX]\n", pos);
+	fprintf(program->asmFile, "//%s\n", node->left->name);
+	fprintf(program->asmFile, "POP [%d+RAX]\n", pos);
 	
 	return OK;
 }
 
-static int ParseIf(TreeNode_t* node, Program_t* program)
+int ParseIf(TreeNode_t* node, Program_t* program)
 {
 	if (!CheckForVar(node->left, program->tabStk))
 	{
-		return UNDEF_VAR;
+		UNDEF_VAR(node->right);
 	}
 	
 	CountExpression(node->left, program);
@@ -216,96 +378,121 @@ static int ParseIf(TreeNode_t* node, Program_t* program)
 
 	if (node->right->type != Type_ELSE)
 	{
-		fprintf(program->asmFile, "JNE :if_node_%lu\n", program->ifCounter);
+		fprintf(program->asmFile, "\nJE :if_%lu\n", program->ifCounter);
 
 		ParseStatement(node->right, program);
 
-		VarTable_t* curTable = GetTableFromStk(stk, stk->size - 1);
-		VarTableDtor(curTable)
-		StackPop(program->stk);			
+		VarTable_t* curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
+		VarTableDtor(curTable);
+		StackPop(program->tabStk);			
 		
-		curTable = GetTableFromStk(stk, stk->size - 1);
+		curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
 		fprintf(program->asmFile, "PUSH %lu\n", curTable->raxPos);
 		fprintf(program->asmFile, "POP RAX\n");	
 
-		fprintf(program->asmFile, "if_%lu:\n", program->ifCounter++);
+		fprintf(program->asmFile, "\nif_%lu:\n", program->ifCounter++);
 	}
 	else
 	{
-		fprintf(program->asmFile, "JNE :else_%lu\n", program->ifCounter);
-
+		fprintf(program->asmFile, "\nJE :else_%lu\n", program->ifCounter);
+	
 		ParseStatement(node->right->left, program);
-
-		VarTable_t* curTable = GetTableFromStk(stk, stk->size - 1);
-		VarTableDtor(curTable)
-		StackPop(program->stk);			
+		VarTable_t* curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
+		VarTableDtor(curTable);
+		StackPop(program->tabStk);			
 		
-		curTable = GetTableFromStk(stk, stk->size - 1);
+		curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
 		fprintf(program->asmFile, "PUSH %lu\n", curTable->raxPos);
 		fprintf(program->asmFile, "POP RAX\n");	
 		
-		fprintf(program->asmFile, "JMP :if_%lu\n", program->ifCounter);
-		fprintf(program->asmFile, "else_%lu:\n", program->ifCounter);
+		fprintf(program->asmFile, "\nJMP :if_%lu\n", program->ifCounter);
+		fprintf(program->asmFile, "\nelse_%lu:\n", program->ifCounter);
 
 		ParseStatement(node->right->right, program);
 		
-		curTable = GetTableFromStk(stk, stk->size - 1);
-		VarTableDtor(curTable)
-		StackPop(program->stk);			
+		curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
+		VarTableDtor(curTable);
+		StackPop(program->tabStk);			
 		
-		curTable = GetTableFromStk(stk, stk->size - 1);
+		curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
 		fprintf(program->asmFile, "PUSH %lu\n", curTable->raxPos);
 		fprintf(program->asmFile, "POP RAX\n");	
 		
-		fprintf(program->asmFile, "if_%lu\n", program->ifCounter++);	
+		fprintf(program->asmFile, "\nif_%lu:\n", program->ifCounter++);	
 	}
 	
 	return OK;
 }
 
-static int ParseWhile(TreeNode_t* node, Program_t* program)
+int ParseWhile(TreeNode_t* node, Program_t* program)
 {
 	if (!CheckForVar(node->left, program->tabStk))
 	{
-		return UNDEF_VAR;
+		UNDEF_VAR(node->right);
 	}
 	
-	fprintf(program->asmFile, "while_%lu:\n", program->whileCounter);
+	fprintf(program->asmFile, "\nwhile_%lu:\n", program->whileCounter);
 
 	CountExpression(node->left, program);
 	fprintf(program->asmFile, "PUSH 0\n");
 
-	fprintf(program->asmFile, "JNE :while_no_%lu\n", program->whileCounter);
+	fprintf(program->asmFile, "\nJE :while_no_%lu\n", program->whileCounter);
 
 	ParseStatement(node->right, program);
 	
-	VarTable_t* curTable = GetTableFromStk(stk, stk->size - 1);
-	VarTableDtor(curTable)
-	StackPop(program->stk);			
+	VarTable_t* curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
+	VarTableDtor(curTable);
+	StackPop(program->tabStk);			
 	
-	curTable = GetTableFromStk(stk, stk->size - 1);
+	curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 1);
 	fprintf(program->asmFile, "PUSH %lu\n", curTable->raxPos);
 	fprintf(program->asmFile, "POP RAX\n");	
 	
-	fprintf(program->asmFile, "JMP while_%lu:\n", program->whileCounter++);	
-	fprintf(program->asmFile, "while_no_%lu:\n",  program->whileCounter++);	
+	fprintf(program->asmFile, "\nJMP while_%lu:\n", program->whileCounter);	
+	fprintf(program->asmFile, "\nwhile_no_%lu:\n",  program->whileCounter++);	
 	
 	return OK;
 }
 
-static int ParseRet(TreeNode_t* node, Program_t* program)
+int ParseRet(TreeNode_t* node, Program_t* program)
 {
 	if (!CheckForVar(node->left, program->tabStk))
 	{
-		return UNDEF_VAR;
+		UNDEF_VAR(node->right);
 	}	
 
+	int isInLocal = 0;
+	TreeNode_t* curNode = node;
+	while (curNode->type != Type_FUNC)
+	{
+		if (curNode->type == Type_IF    ||
+			curNode->type == Type_ELSE  ||
+			curNode->type == Type_WHILE)
+		{
+			isInLocal = 1;
+		}
+
+		curNode = curNode->parent;
+	}
+
 	CountExpression(node->left,  program);
-	fprintf(program->asmFile, "POP RCX\n"
-							  "RET\n");
+
+	VarTable_t* curTable = GetTableFromStk(program->tabStk, program->tabStk->size - 2);
+	if (isInLocal)
+	{
+		fprintf(program->asmFile, "POP RCX\n"
+								  "PUSH RAX\n"
+								  "PUSH %lu\n"
+								  "SUB\n"
+								  "POP RAX\n", curTable->size);
+	}
+
+	fprintf(program->asmFile, "\nRET\n\n");
+
+	return OK;
 }
 
-static void CountExpression(TreeNode_t* node, Program_t* program)
+void CountExpression(TreeNode_t* node, Program_t* program)
 {
 	if (node->left)  CountExpression(node->left, program);
 	if (node->right) CountExpression(node->right, program);
@@ -316,27 +503,27 @@ static void CountExpression(TreeNode_t* node, Program_t* program)
 	}
 	else if (node->type == Type_VAR)
 	{
-		size_t varPos = GetVarPos(node, program->tabStk);
-
-		fprintf(program->asmFile, "PUSH [%lu+RAX]\n", varPos);
+		int varPos = GetVarPos(node, program->tabStk);
+		fprintf(program->asmFile, "PUSH [%d+RAX]\n", varPos);
 	}
 	else if (node->type == Type_CALL)
 	{
-		fprint(program->asmFile, "hello world\n");
+		ParseCall(node, program);
+		fprintf(program->asmFile, "PUSH RCX\n");
 	}
 	
 	if (node->type == Type_OP)
 	{
 		switch (node->opVal)
 		{
-			case Op_Add: fprint(program->asmFile, "ADD\n"); break;
-			case Op_Sub: fprint(program->asmFile, "SUB\n"); break;
-			case Op_Mul: fprint(program->asmFile, "MUL\n"); break;
-			case Op_Div: fprint(program->asmFile, "DIV\n"); break;
-			case Op_Pow: fprint(program->asmFile, "POW\n"); break;
-			case Op_Sin: fprint(program->asmFile, "ADD\n"); break;
-			case Op_Cos: fprint(program->asmFile, "COS\n"); break;
-			case Op_Ln:  fprint(program->asmFile, "LN\n"); break;
+			case Op_Add: fprintf(program->asmFile, "ADD\n"); break;
+			case Op_Sub: fprintf(program->asmFile, "SUB\n"); break;
+			case Op_Mul: fprintf(program->asmFile, "MUL\n"); break;
+			case Op_Div: fprintf(program->asmFile, "DIV\n"); break;
+			case Op_Pow: fprintf(program->asmFile, "POW\n"); break;
+			case Op_Sin: fprintf(program->asmFile, "ADD\n"); break;
+			case Op_Cos: fprintf(program->asmFile, "COS\n"); break;
+			case Op_Ln:  fprintf(program->asmFile, "LN\n"); break;
 			
 			default: break;
 		}
@@ -344,11 +531,11 @@ static void CountExpression(TreeNode_t* node, Program_t* program)
 }
 
 
-static int CheckForVar(TreeNode_t* node, Stack_t* stk)
+int CheckForVar(TreeNode_t* node, Stack_t* stk)
 {
 	if (node->left)
 	{
-		(!CheckForVar(node->left, stk)) return 0;
+		if (!CheckForVar(node->left, stk)) return 0;
 	}
 	
 	if (node->right)
@@ -356,7 +543,7 @@ static int CheckForVar(TreeNode_t* node, Stack_t* stk)
 		if (!CheckForVar(node->right, stk)) return 0;
 	}
 
-	size_t stkIndex      = stk->size - 1;
+	size_t stkIndex      =  stk->size - 1;
 	VarTable_t* curTable = GetTableFromStk(stk, stkIndex);
 	
 	if (node->type == Type_VAR)
@@ -365,45 +552,55 @@ static int CheckForVar(TreeNode_t* node, Stack_t* stk)
 		{
 			for (size_t varIndex = 0; varIndex < curTable->size; varIndex++)
 			{
-				if (STR_EQ(node->name, (curTable->arr[varIndex])->name))
+				if (STR_EQ(node->name, (curTable->arr[varIndex]).name))
+				{
 					return 1; //if we met the variable
+				}
 			}
-
+			
+			if (stkIndex == 0)
+				break;
+	
 			stkIndex--;
 			curTable = GetTableFromStk(stk, stkIndex);
 		}
 
 		return 0; //if variable is not defined
 	}
-
+		
 	return 1;
-	
 }
 				
-static VarTable_t* GetTableFromStk(Stack_t* stk, size_t index)
+VarTable_t* GetTableFromStk(Stack_t* stk, size_t index)
 {
-	return (stk->data)[index];
+	return stk->data[index];
 }
 
 
-static size_t GetVarPos(TreeNode_t* node, Stack_t* stk)
+int GetVarPos(TreeNode_t* node, Stack_t* stk)
 {
 	size_t stkIndex      = stk->size - 1;
 	VarTable_t* curTable = GetTableFromStk(stk, stkIndex);
-	
+	size_t       lastRax = curTable->raxPos;
+
 	while (stkIndex >= 0)
 	{
 		for (size_t varIndex = 0; varIndex < curTable->size; varIndex++)
 		{
-			if (STR_EQ(node->name, (curTable->arr[varIndex])->name))
-				return (curTable->arr[varIndex])->pos + curTable->raxPos;
+			if (STR_EQ(node->name, (curTable->arr[varIndex]).name))
+			{
+				return (int)(curTable->arr[varIndex]).pos + (int)curTable->raxPos - (int)lastRax;
+			}
+		}
+		
+		if (stkIndex == 0)
+		{
+			break;
 		}
 
 		stkIndex--;
 		curTable = GetTableFromStk(stk, stkIndex);
 	}
-
 	return POISON_PTR;
 }
-
 
