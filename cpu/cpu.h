@@ -1,5 +1,5 @@
 #include "../filework/filework.h"
-#include "../stack/stack.h"
+#include "stack/stack.h"
 #include "../log/LOG.h"
 #include <ctype.h>
 #include <string.h>
@@ -13,7 +13,7 @@
 #ifdef LOG_MODE
     FILE* PrintFile = startLog(PrintFile);
 #else
-    FILE* PrintFile = stdout;
+    FILE* PrintFile = fopen("cpuLog.txt", "w+");
 #endif
 
 typedef double arg_t;
@@ -31,9 +31,10 @@ const size_t REGS_COUNT      = 10;
 const size_t MAX_RAM_SIZE    = 225;
 const size_t MAX_LABEL_COUNT = 20; 
 const size_t LABEL_SIZE      = 20;
-const char   LISTING_FILE[]  = "obj/listing.txt";  
+const char   LISTING_FILE[]  = "../obj/listing.txt";  
 const size_t POISON_ARG      = 314;
 char*        POISON_NAME     = "ded32";
+const double EPS             = 0.00001;
 
 #define DEF_CMD(name, num, arg, code) \
     CMD_##name = num,
@@ -51,7 +52,7 @@ enum Commands
 
 struct Label_t
 {
-    int   adress;
+    int   address;
     char  name[LABEL_SIZE];
 };
 
@@ -129,5 +130,7 @@ int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, size_t *ip);
 int LabelAnalyze(char* cmd, AsmCmd_t* asmCmd, size_t ip);
 
 int GetJumpArg(size_t* ip, Cpu_t* cpu);
+
+int DoubleCmp(double num1, double num2);
 
 void CpuDump(Cpu_t* cpu, size_t ip);

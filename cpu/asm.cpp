@@ -245,6 +245,8 @@ int MakeCommonArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
             CopyVal(asmCmd->asmArr + *ip + 1, &curValue);
 
             fprintf(asmCmd->listfile, "%02X " TYPE_ARG_FMT,  *(asmCmd->asmArr + *ip),  curValue);
+			
+			*ip += 1 + sizeof(arg_t);
         }
 
         else if (sscanf(line, "%19s", curReg) == 1  && (intReg = IsRegister(curReg)) != -1)
@@ -253,12 +255,14 @@ int MakeCommonArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
 			memcpy(asmCmd->asmArr + *ip + 1, &intReg, sizeof (int));  
 
             fprintf(asmCmd->listfile, "%02X %02X",  *(asmCmd->asmArr + *ip), intReg);
+
+
+			*ip += 1 + sizeof(int);
         }
         
         else
             return 1;
         
-        *ip += 1 + sizeof(arg_t);
     }
     
     else
@@ -319,26 +323,30 @@ int MakeBracketsArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
             }
         
             else
+			{
                 return 1;
+			}
         }
 
         else
+		{
             return 1;
+		}
 
         *ip += 1 + sizeof(int);
     }
     
     else
     {
-        if (sscanf(arg, "%d+%20s", &curValue, curReg) == 2)
+        if (sscanf(arg, "%d+%s", &curValue, curReg) == 2)
         {
+			
             curReg[strlen(curReg) - 1] = '\0';
-
             if ((intReg = IsRegister(curReg)) != -1)
             {
                 *(asmCmd->asmArr + *ip) = command | ARG_IMMED | ARG_REG | ARG_MEM;  
 				
-				memcpy(asmCmd->asmArr + *ip + 1, &curValue, sizeof(int);
+				memcpy(asmCmd->asmArr + *ip + 1, &curValue, sizeof(int));
 				memcpy(asmCmd->asmArr + *ip + 1 + sizeof(int), &intReg, sizeof(int));
 
                 fprintf(asmCmd->listfile, "%02X %02X %02X ",  *(asmCmd->asmArr + *ip),  curValue,  intReg);
@@ -417,7 +425,7 @@ int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, size_t *ip)
     ASSERT(ip     != NULL);
     
     *(asmCmd->asmArr + *ip) = command;
-
+	
     int  curValue                 = 0;
     char curTextLabel[LABEL_SIZE] = {};
 
@@ -455,7 +463,6 @@ int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, size_t *ip)
             {
                 if (strcmp(asmCmd->labels[num].name, curTextLabel) == 0)
                 {
-
 					memcpy(asmCmd->asmArr + *ip + 1, &asmCmd->labels[num].address, sizeof(int));
                     curValue = num;
 

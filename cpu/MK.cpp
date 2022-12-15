@@ -2,9 +2,8 @@
 
 int main(void)
 {
-    system("obj/asm obj/circle.txt obj/bin.txt");
-    system("obj/cpu obj/bin.txt");
-    system("obj/disasm obj/bin.txt obj/disasm.txt");
+    system("run/asm ../obj/arm.asm ../obj/bin.txt");
+    system("run/cpu ../obj/bin.txt");
     
     return 0;
 }

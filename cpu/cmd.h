@@ -72,7 +72,6 @@ DEF_CMD(POP, 9, 1,
     INDEX_UP;
     VAR* ARG = GET_POP_ARG;
     *ARG = POP;
-    SHOW_RAM;
 })
 
 DEF_CMD(INF, 22, 0,
@@ -93,10 +92,11 @@ DEF_CMD(ROOT_PR, 19, 0,
     printf("%d.%d\n", INTEG, FRAC);
 })
 
-DEF_CMD(SQRT, 20, 0, 
+DEF_CMD(POW, 20, 0, 
 {
-    VAR ARG = floor(sqrt(POP));
-    PUSH(ARG);
+	VAR	DEG = POP;
+    VAR ARG = POP;
+    PUSH(pow(ARG, DEG));
 })
 
 DEF_CMD(MINUS_PR, 21, 0,
