@@ -13,7 +13,7 @@
 #ifdef LOG_MODE
     FILE* PrintFile = startLog(PrintFile);
 #else
-    FILE* PrintFile = fopen("cpuLog.txt", "w+");
+    FILE* PrintFile = fopen("obj/cpuLog.txt", "w+");
 #endif
 
 typedef double arg_t;
@@ -24,15 +24,15 @@ typedef double arg_t;
     if (cmd){                            \
         fprintf(stderr, "Error in " #cmd "\n");}
     
-const size_t STR_MAX_SIZE    = 20;
+const int STR_MAX_SIZE    = 20;
 const short  BASIC_SIGN      = 'VG';
-const size_t BASIC_VERS      = 1;
-const size_t REGS_COUNT      = 10;
-const size_t MAX_RAM_SIZE    = 225;
-const size_t MAX_LABEL_COUNT = 20; 
-const size_t LABEL_SIZE      = 20;
-const char   LISTING_FILE[]  = "../obj/listing.txt";  
-const size_t POISON_ARG      = 314;
+const int BASIC_VERS      = 1;
+const int REGS_COUNT      = 10;
+const int MAX_RAM_SIZE    = 225;
+const int MAX_LABEL_COUNT = 20; 
+const int LABEL_SIZE      = 20;
+const char   LISTING_FILE[]  = "obj/listing.txt";  
+const int POISON_ARG      = 314;
 char*        POISON_NAME     = "ded32";
 const double EPS             = 0.00001;
 
@@ -67,9 +67,9 @@ enum Arg_Ctrl
 struct CmdInfo_t
 {
     short  sign;
-    size_t vers;
-    size_t nCmd;
-    size_t filesize;
+    int vers;
+    int nCmd;
+    int filesize;
 };
 
 struct AsmCmd_t
@@ -84,7 +84,7 @@ struct AsmCmd_t
 struct Cpu_t
 {
     unsigned char* cmdArr;
-    size_t         size;
+    int         size;
     Stack_t        stk;
     arg_t          regs[REGS_COUNT];
     arg_t          RAM[MAX_RAM_SIZE];
@@ -109,28 +109,28 @@ int IsRegister(const unsigned char* reg);
 
 void CopyVal(unsigned char* arr, const arg_t* value);
 
-int MakeArg(char* line, int command, AsmCmd_t* asmCmd, size_t *ip);
+int MakeArg(char* line, int command, AsmCmd_t* asmCmd, int *ip);
 
 int CpuCtor(Cpu_t* cpu, FILE* binary);
 
 int CpuDtor(Cpu_t* cpu, FILE* binary);
 
-arg_t GetPushArg(int command, size_t* ip, Cpu_t* cpu);
+arg_t GetPushArg(int command, int* ip, Cpu_t* cpu);
 
-arg_t* GetPopArg(int command, size_t* ip, Cpu_t* cpu);
+arg_t* GetPopArg(int command, int* ip, Cpu_t* cpu);
 
 int isInBrackets(char* arg);
 
-int MakeCommonArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip);
+int MakeCommonArg(char* line, int command, AsmCmd_t* asmCmd, int* ip);
 
-int MakeBracketsArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip);
+int MakeBracketsArg(char* line, int command, AsmCmd_t* asmCmd, int* ip);
 
-int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, size_t *ip);
+int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, int *ip);
 
-int LabelAnalyze(char* cmd, AsmCmd_t* asmCmd, size_t ip);
+int LabelAnalyze(char* cmd, AsmCmd_t* asmCmd, int ip);
 
-int GetJumpArg(size_t* ip, Cpu_t* cpu);
+int GetJumpArg(int* ip, Cpu_t* cpu);
 
 int DoubleCmp(double num1, double num2);
 
-void CpuDump(Cpu_t* cpu, size_t ip);
+void CpuDump(Cpu_t* cpu, int ip);

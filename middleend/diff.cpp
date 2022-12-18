@@ -6,25 +6,27 @@
 
 int main(void)
 {
-	Expression_t exp = {};
-	DataDownload(&exp);
-	
-	FILE* texFile = fopen("obj/texfile.tex", "w+");
-	MakeBook(&exp, texFile);
-	fclose(texFile);
+	FILE* standart = fopen("obj/standart.txt", "r");
+	assert(standart);
 
-	system("pdflatex obj/texfile.tex");
-	system("xdg-open texfile.pdf");
-	system("cvlc obj/muz.mp3");
+	Tree_t  stTree = {};
+	stTree.root = ReadStandart(standart);
+
+	fclose(standart);
 	
-	TreeDtor(exp.tree);
-	free(exp.tree);
-	free(exp.varArr);
 	
+	TreeSimplify(&stTree);
+	TreeUpdate(&stTree, stTree.root);
+
+	standart = fopen("obj/standart.txt", "w");
+	PrintTreeToFile(stTree.root, standart);
+	fclose(standart);
+
+	TreeDtor(&stTree);	
+
 #ifdef LOG_MODE
     endLog(LogFile);
 #endif
-
 	return 0;
 }
 
@@ -264,7 +266,7 @@ TreeNode_t* GetVar(char** str)
 		
 		assert(oldStr != *str);
 		
-		strcpy(node->varVal, var);
+		strcpy(node->name, var);
 
 		return node;
 	}
@@ -426,7 +428,7 @@ int TrNodesPrint(const TreeNode_t* node, FILE* texFile)
 
 	switch (node->type)
 	{
-		case Type_VAR: fprintf(texFile, "%s", node->varVal);  break; 
+		case Type_VAR: fprintf(texFile, "%s", node->name);  break; 
 		case Type_NUM: 
 		{
 			if (node->numVal < 0)
@@ -570,7 +572,7 @@ TreeNode_t* DiffTree(TreeNode_t* node, const char* var)
 		}
 		case Type_VAR:
 		{
-			if (strcmp(node->varVal, var) == 0)
+			if (strcmp(node->name, var) == 0)
 				return MAKE_NUM(1);
 			else
 				return MAKE_NUM(0);
@@ -622,7 +624,7 @@ int IsInTree(TreeNode_t* node, const char* value)
 {
 	if (node == NULL || value == NULL) return WRONG_DATA;
 	
-	if (node->type == Type_VAR && strcmp(node->varVal, value) == 0)
+	if (node->type == Type_VAR && strcmp(node->name, value) == 0)
 		return 1;
 	
 	else if (node->left == NULL && node->right == NULL)
@@ -647,7 +649,7 @@ TreeNode_t* TrNodeCopy(TreeNode_t* node)
 	newNode->type   = node->type;
 	newNode->opVal  = node->opVal;
 	newNode->numVal = node->numVal;
-	strcpy(newNode->varVal, node->varVal);
+	strcpy(newNode->name, node->name);
 	
 	if (node->left != nullptr)
 		newNode->left = TrNodeCopy(node->left);
@@ -694,7 +696,10 @@ int TreeSimplifyConst(Tree_t* tree, TreeNode_t* node)
 	
 	if (node->left == NULL && node->right == NULL) return 0;
 	
-	int isSimpled = SimplifyConst(node, tree);
+	int isSimpled = 0;
+
+	if (node->left != NULL && node->type == Type_OP && node->opVal != Op_IsBt)
+		isSimpled = SimplifyConst(node, tree);
 	TreeUpdate(tree, tree->root);
 
 	if (!isSimpled && node && node->left)
@@ -712,12 +717,12 @@ int SimplifyConst(TreeNode_t* node, Tree_t* tree)
 	if (node == NULL) return WRONG_DATA;
 	
 	int isSimpled = 0;
-
-	if (node->right->type == Type_NUM) 
+	
+	if (node->left->type == Type_NUM) 
 	{                                              
 		double newNum = 0;
 
-		if (node->left != NULL && node->left->type == Type_NUM)				
+		if (node->right != NULL && node->right->type == Type_NUM)				
 		{
 			switch (node->opVal)
 			{
@@ -730,13 +735,13 @@ int SimplifyConst(TreeNode_t* node, Tree_t* tree)
 				default: break;
 			}
 		}
-		else if (node->left == NULL)	
+		else if (node->right == NULL)	
 		{
 			switch (node->opVal)
 			{
-				case Op_Sin: newNum = sin(node->right->numVal);	break;
-				case Op_Cos: newNum = cos(node->right->numVal);	break;
-				case Op_Ln:	 newNum = log(node->right->numVal);	break;
+				case Op_Sin: newNum = sin(node->left->numVal);	break;
+				case Op_Cos: newNum = cos(node->left->numVal);	break;
+				case Op_Ln:	 newNum = log(node->left->numVal);	break;
 
 				default: break;
 			}
@@ -768,7 +773,11 @@ int TreeSimplifyNeutral(Tree_t* tree, TreeNode_t* node)
 	
 	if (node->left == NULL && node->right == NULL) return 0;
 	
-	int isSimpled = SimplifyNeutral(node, tree);
+	int isSimpled = 0;
+
+	if (node->type == Type_OP && node->opVal != Op_IsBt)
+		isSimpled = SimplifyNeutral(node, tree);
+
 	TreeUpdate(tree, tree->root);
 
 	if (!isSimpled && node && node->left)
@@ -902,7 +911,7 @@ int PutValueInPoint(TreeNode_t* node, const char* var, double point)
 {
 	if (node == NULL || var == NULL) return WRONG_DATA;
 	
-	if (node->type == Type_VAR && strcmp(node->varVal, var) == 0)
+	if (node->type == Type_VAR && strcmp(node->name, var) == 0)
 	{
 		node->type   = Type_NUM;
 		node->numVal = point;
@@ -1034,136 +1043,5 @@ int CalculateError(Expression_t* exp, FILE* texFile)
 	
 	return STATUS_OK;
 }
-
-/*
-int ReadTree(Tree_t* tree, const char* expression, size_t size)
-{
-	if (expression == NULL) return WRONG_DATA;
-
-	TreeNode_t* curNode = tree->root;
-	
-
-	for (size_t index = 0; index < size; ++index)
-	{
-		if (*(expression + index) == ')')
-		{
-			curNode = curNode->parent;
-			continue;
-		}
-		else if (*(expression + index) == '(')
-		{
-			if (curNode->left != NULL)
-			{
-				TrNodeInsert(tree, curNode, RIGHT);
-				curNode = curNode->right;
-				continue;
-			}
-			else
-			{
-				TrNodeInsert(tree, curNode, LEFT);
-				curNode = curNode->left;
-				continue;
-			}
-		}
-		else 
-		{
-			index += ReadNodeValue(curNode, expression + index);	
-
-		}	
-	
-		if (curNode->parent->opVal == Op_Sin ||
-			curNode->parent->opVal == Op_Cos ||
-			curNode->parent->opVal == Op_Ln)
-		{
-			curNode->parent->right = curNode;
-			curNode->parent->left  = NULL;
-		}
-	}
-
-	tree->root = tree->root->left;
-	free(tree->root->parent);
-
-	tree->root->parent = NULL;
-	tree->size--;
-	
-	return STATUS_OK; 
-}
-
-static int ReadNodeValue(TreeNode_t* curNode, const char* expression)
-{
-	int    charCount = 0;
-	double dblVal    = 0;
-
-	if (sscanf(expression, "%lf%n", &dblVal, &charCount) == 1)
-	{
-		curNode->type   = Type_NUM;
-		curNode->numVal = dblVal;
-	
-		return charCount - 1;
-	}
-
-	char*  value     = (char*) calloc(STR_MAX_SIZE, sizeof(char)); 
-
-	if (sscanf(expression, "%[^()]%n", value, &charCount))
-	{
-		if (strchr(value, '+'))
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Add;
-		}
-		else if (strchr(value, '-'))
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Sub;
-		}
-		else if (strchr(value, '*'))
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Mul;
-		}
-		else if (strchr(value, '/'))
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Div;
-		}
-		else if (strchr(value, '^'))
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Pow;
-		}
-		else if (strcmp(value, "sin") == 0)
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Sin;
-		}
-		else if (strcmp(value, "cos") == 0)
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Cos;
-		}
-		else if (strcmp(value, "ln") == 0)
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Ln;
-		}
-		else if (strcmp(value, "log") == 0)
-		{
-			curNode->type  = Type_OP;
-			curNode->opVal = Op_Log;
-		}
-		else
-		{
-			curNode->type     = Type_VAR;
-			strcpy(curNode->varVal, value);
-		}
-		
-		free(value);
-		return charCount - 1;
-	}
-	
-	return charCount;
-}
-
-*/
 
 

@@ -1,10 +1,57 @@
 CALL :main
 HLT
 
-fuck:
+main:
+PUSH 0
+//ded
+POP [0+RAX]
+
+INP
+POP [0+RAX]
+PUSH 0
+//otec
+POP [1+RAX]
+
+INP
+POP [1+RAX]
+PUSH 0
+//brat
+POP [2+RAX]
+
+INP
+POP [2+RAX]
+PUSH 0
+//greatded
+POP [3+RAX]
+
+PUSH 0
+//greatbab
+POP [4+RAX]
+
 PUSH [0+RAX]
-PUSH 1
+PUSH 0
+
+JE :else_0
+PUSH RAX
+PUSH 5
+ADD
+POP RAX
+
+PUSH [-4+RAX]
+PUSH 2
+POW
+PUSH 4
+PUSH [-5+RAX]
+MUL
+PUSH [-3+RAX]
+MUL
 SUB
+//godfather
+POP [0+RAX]
+
+PUSH [0+RAX]
+PUSH 0
+ISBT
 PUSH 0
 
 JE :else_0
@@ -13,29 +60,37 @@ PUSH 1
 ADD
 POP RAX
 
-PUSH [-1+RAX]
-PUSH 1
-SUB
-//new
-POP [0+RAX]
-
-PUSH [0+RAX]
-
-PUSH RAX
-PUSH 1
-ADD
-POP RAX
-POP [0+RAX]
-
-CALL :fuck
-
-PUSH RAX
-PUSH 1
-SUB
-POP RAX
-PUSH RCX
-PUSH [-1+RAX]
+PUSH -1
+PUSH [-5+RAX]
 MUL
+PUSH [-1+RAX]
+PUSH 0.5
+POW
+ADD
+PUSH 2
+PUSH [-6+RAX]
+MUL
+DIV
+//greatded
+POP [-3+RAX]
+PUSH [-3+RAX]
+OUT
+PUSH -1
+PUSH [-5+RAX]
+MUL
+PUSH [-1+RAX]
+PUSH 0.5
+POW
+SUB
+PUSH 2
+PUSH [-6+RAX]
+MUL
+DIV
+//greatbab
+POP [-2+RAX]
+PUSH [-2+RAX]
+OUT
+PUSH 1
 POP RCX
 PUSH RAX
 PUSH 1
@@ -44,7 +99,7 @@ POP RAX
 
 RET
 
-PUSH 0
+PUSH 5
 POP RAX
 
 JMP :if_0
@@ -64,38 +119,76 @@ POP RAX
 
 RET
 
-PUSH 0
+PUSH 5
 POP RAX
 
 if_0:
-
-main:
 PUSH 0
-//vova
-POP [0+RAX]
+POP RAX
 
-INP
-POP [0+RAX]
-PUSH [0+RAX]
+JMP :if_1
 
+else_1:
 PUSH RAX
-PUSH 2
+PUSH 5
 ADD
 POP RAX
-POP [0+RAX]
 
-CALL :fuck
+PUSH [-4+RAX]
+PUSH 0
 
+JE :else_1
 PUSH RAX
-PUSH 2
+PUSH 0
+ADD
+POP RAX
+
+PUSH -1
+PUSH [-3+RAX]
+MUL
+PUSH [-4+RAX]
+DIV
+//greatded
+POP [-2+RAX]
+PUSH [-2+RAX]
+OUT
+PUSH 1
+POP RCX
+PUSH RAX
+PUSH 0
 SUB
 POP RAX
-PUSH RCX
-//vitya
-POP [1+RAX]
 
-PUSH [1+RAX]
-OUT
+RET
+
+PUSH 5
+POP RAX
+
+JMP :if_1
+
+else_1:
+PUSH RAX
+PUSH 0
+ADD
+POP RAX
+
+PUSH 1
+POP RCX
+PUSH RAX
+PUSH 0
+SUB
+POP RAX
+
+RET
+
+PUSH 5
+POP RAX
+
+if_1:
+PUSH 0
+POP RAX
+
+if_2:
 PUSH 0
 
 RET

@@ -84,5 +84,19 @@ void textDtor(TEXT* text)
     free(text->lines);
 }
 
+char* SkipSpaces(char** src, size_t* lineIndex)
+{
+	assert(src && lineIndex);
+
+	while (isspace(**src))
+	{
+		if (**src == '\n')
+			(*lineIndex)++;
+		++(*src);
+	}
+
+	return *src;
+}
+
 
 

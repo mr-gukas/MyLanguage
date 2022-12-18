@@ -5,13 +5,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "filework/filework.h"
-#include "tree/tree.h"
-#include "dsl.h"
-#include "backend/backend.h"
+#include "../filework/filework.h"
+#include "../tree/tree.h"
+#include "../utils/dsl.h"
+#include "../standart/standart.h"
 
-
-#define STR_EQ(str1, str2) (strncmp (str1, str2, strlen (str1)) == 0)
+#define STR_EQ(str1, str2) (strcmp (str1, str2) == 0)
 
 #define PRINT_NAME printf("<%s>\n", (*(tokens->firstTok + *curIndex))->name);
 #define PRINT_NUM  printf("<%lg>\n", (*(tokens->firstTok + *curIndex))->numVal);
@@ -19,7 +18,7 @@
 #define SYNTAXCTRL(str) \
 		if (!STR_EQ(str, (*(tokens->firstTok + *curIndex))->name)) \
 		{ \
-			fprintf(stderr, "%d: Syntax error! Expected: " str " in %lu\n", __LINE__, (*(tokens->firstTok + *curIndex))->lineIndex); \
+			fprintf(stderr, "file: code.txt: Syntax error! Expected: " str " in %lu\n", (*(tokens->firstTok + *curIndex))->lineIndex); \
 			abort(); \
 		} \
 		if (*curIndex+1 < tokens->nodeCount) (*curIndex)++;
@@ -48,7 +47,6 @@ struct MemDefender_t
 };
 
  void GetTokens(Tokens_t* tokens, FILE* code);
- char* SkipSpaces(char** src, size_t* lineIndex);
  size_t GetWord(char *dest, const char *src);
  NodeType GetType(const char* word);
  TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef);

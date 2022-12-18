@@ -1,0 +1,53 @@
+#Armenian language
+#NAME: ARA
+#format: .ara
+
+krknaki main bac pag 
+barev
+	axper ded nshanakuma 0 verj
+	cardacek bac ded pag verj
+
+	axper otec nshanakuma 0 verj
+	cardacek bac otec pag verj
+
+	axper brat nshanakuma 0 verj
+	cardacek bac brat pag verj
+	
+	axper greatded nshanakuma 0 verj
+	axper greatbab nshanakuma 0 verj
+	
+	ete bac ded pag aysdepkum
+	barev
+		axper godfather nshanakuma bac otec astijan 2 pag hanats 4 basmapatkel ded basmapatkel brat verj
+		ete bac godfather pakas 0 pag aysdepkum
+		barev
+			
+			greatded nshanakuma bac -1 basmapatkel otec gumarats bac godfather astijan 0.5 pag pag bajanel bac 2 basmapatkel ded pag verj
+			tpek bac greatded pag verj
+			greatbab nshanakuma bac -1 basmapatkel otec hanats bac godfather astijan 0.5 pag pag bajanel bac 2 basmapatkel ded pag verj
+			tpek bac greatbab pag verj
+			veradardz 1 verj
+
+		ctesutyun
+		hakarak
+		barev
+
+			veradardz 1 verj
+
+		ctesutyun verj
+	ctesutyun
+	hakarak
+	barev 
+		ete bac otec pag aysdepkum
+		barev
+			greatded nshanakuma -1 basmapatkel brat bajanel otec verj
+			tpek bac greatded pag verj
+			veradardz 1 verj
+		ctesutyun
+		hakarak
+		barev
+			veradardz 1 verj
+		ctesutyun verj
+	ctesutyun verj	
+	veradardz 0 verj
+ctesutyun

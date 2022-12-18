@@ -110,6 +110,17 @@ DEF_CMD(RET, 23, 0,
     ip = ret_ip;
 })
 
+DEF_CMD(ISBT, 24, 0, 
+{
+    VAR NUM2 = POP;
+    VAR NUM1 = POP;
+	
+	if (NUM1 < NUM2)
+		PUSH(0);
+	else
+		PUSH(1);
+})
+
 DEF_JMP(JMP, 10, || 1 ||)
 
 DEF_JMP(JA,  11,       >)

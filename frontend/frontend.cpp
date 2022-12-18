@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "frontend.h"
 
 #ifdef LOG_MODE
     FILE* LogFile = startLog(LogFile);
@@ -22,11 +22,11 @@ int main(const int argc, const char* argv[])
 	TreeUpdate(&tree, tree.root);
 	
 	TreeDump(&tree);
-
-	WriteAsmCode(tree.root);
-
+	FILE* standart = fopen("obj/standart.txt", "w+");
+	PrintTreeToFile(tree.root, standart);
+	fclose(standart);
+	
 	TokensDtor(&tokens, &memdef);
-
 	fclose(code);
 	
 #ifdef LOG_MODE
@@ -35,15 +35,16 @@ int main(const int argc, const char* argv[])
 	return 0;
 }
 
- void MemDefenderCtor(MemDefender_t* memdef, size_t size)
+void MemDefenderCtor(MemDefender_t* memdef, size_t size)
 {
 	memdef->adr  = (TreeNode_t**) calloc(size, sizeof(TreeNode_t*));
 	memdef->size = 0;
 }
 
- void GetTokens(Tokens_t* tokens, FILE* code)
+void GetTokens(Tokens_t* tokens, FILE* code)
 {
-	
+	assert(tokens && code);
+
 	TEXT data        = {};
 	size_t lineIndex = 1;
 	textCtor(&data, code);
@@ -71,7 +72,7 @@ int main(const int argc, const char* argv[])
 			SkipComments(&dataptr);
 			lineIndex++;
 		}
-		else if (isdigit(*dataptr))
+		else if (isdigit(*dataptr) || *dataptr == '-')
 		{
 			double val    = 0;
 			size_t valLen = 0;
@@ -102,7 +103,7 @@ int main(const int argc, const char* argv[])
 
 					if (STR_EQ("bac", nextWord))
 					{
-						*(tokens->firstTok + tokens->nodeCount) = MakeNode(Type_FUNC, Op_Null, 0, word, NULL, NULL, lineIndex);
+						*(tokens->firstTok + tokens->nodeCount) = MakeNode(Type_FUNC_NAME, Op_Null, 0, word, NULL, NULL, lineIndex);
 					}
 					else
 					{
@@ -119,43 +120,34 @@ int main(const int argc, const char* argv[])
 				OperationType oper = GetOpType(word);
 				*(tokens->firstTok + tokens->nodeCount) = MakeNode(type, oper, 0, word, NULL, NULL, lineIndex);
 			}
-
-			tokens->nodeCount++;		
+			tokens->nodeCount++;	
 		}
 	}
 	textDtor(&data);
 }
 
- OperationType GetOpType(const char* name)
+OperationType GetOpType(const char* name)
 {
+	assert(name);
+
 	if (STR_EQ("gumarats",    name)) return Op_Add;
 	if (STR_EQ("hanats",      name)) return Op_Sub;
 	if (STR_EQ("basmapatkel", name)) return Op_Mul;
 	if (STR_EQ("bajanel",     name)) return Op_Div;
-	if (STR_EQ("gumarats",    name)) return Op_Add;
 	if (STR_EQ("sin",		  name)) return Op_Sin;
 	if (STR_EQ("cos",		  name)) return Op_Cos;
 	if (STR_EQ("ln",          name)) return Op_Ln;
 	if (STR_EQ("astijan",     name)) return Op_Pow;
+	if (STR_EQ("pakas",     name))   return Op_IsBt;
+
 	
 	return Op_Null;
 }
 
-
- char* SkipSpaces(char** src, size_t* lineIndex)
+char* SkipComments(char** src)
 {
-	while (isspace(**src))
-	{
-		if (**src == '\n')
-			(*lineIndex)++;
-		++(*src);
-	}
+	assert(src);
 
-	return *src;
-}
-
- char* SkipComments(char** src)
-{
 	while (**src != '\n')
 	{
 		++(*src);
@@ -163,8 +155,12 @@ int main(const int argc, const char* argv[])
 
 	return *src + 1;
 }
- size_t GetWord(char *dest, const char *src) 
+
+size_t GetWord(char *dest, const char *src) 
 {
+	assert(dest);
+	assert(src);
+
     size_t wordLen = 0;
 
     if (isalpha(*src)) 
@@ -184,22 +180,28 @@ int main(const int argc, const char* argv[])
 	return wordLen;
 }
 
- NodeType GetType(const char* word)
+NodeType GetType(const char* word)
 {
-#define KEY_WORD(name, c_name, type, num)  \
-	if (STR_EQ(name, word))					\
+	assert(word);
+
+#define KEY_WORD(name, c_name, type, standart) \
+	if (STR_EQ(name, word))						\
 		return Type_##type;
 
-#include "keywords.h"
+#include "../utils/keywords.h"
 
 #undef KEY_WORD
 
 	return Type_NULL;
 }
 
- TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+TreeNode_t* GetCode(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
-	if ((*(tokens->firstTok + *curIndex))->type != Type_FUNC && 
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+	if ((*(tokens->firstTok + *curIndex))->type != Type_RET_VAL && 
 		(*(tokens->firstTok + *curIndex))->type != Type_DEF)
 	{
 		fprintf(stderr, "False expression encountered. A variable or function declaration was expected (line %lu)\n", (*(tokens->firstTok + *curIndex))->lineIndex);
@@ -240,7 +242,7 @@ int main(const int argc, const char* argv[])
 		stat1 = stat2;
 	}
 	
-	if ((*(tokens->firstTok + *curIndex))->type != Type_FUNC)
+	if ((*(tokens->firstTok + *curIndex))->type != Type_RET_VAL)
 	{
 		fprintf(stderr, "False expression encountered A variable or function declaration was expected (line %lu)\n", (*(tokens->firstTok + *curIndex))->lineIndex);
 		abort();
@@ -264,6 +266,8 @@ TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
 	assert(tokens);
 	assert(curIndex);
+	assert(memdef);
+
 
 	TreeNode_t* funcDef = GetFuncDef(tokens, curIndex, memdef);
 	assert(funcDef != NULL);
@@ -274,7 +278,7 @@ TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 	stat->left      = funcDef;
 	funcDef->parent = stat;
 
-	while (*curIndex < tokens->nodeCount && (*(tokens->firstTok + *curIndex))->type == Type_FUNC)
+	while (*curIndex < tokens->nodeCount && (*(tokens->firstTok + *curIndex))->type == Type_RET_VAL)
 	{
         TreeNode_t* funcDef2 = GetFuncDef(tokens, curIndex, memdef);
         TreeNode_t* stat2    = MakeNode(Type_STAT, Op_Null, 0, "ST", NULL, NULL);
@@ -294,17 +298,26 @@ TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
     return stat;
 }
 
- TreeNode_t* GetFuncDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+TreeNode_t* GetFuncDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* func = MakeNode(Type_FUNC, Op_Null, 0, "FUNC", NULL, NULL);
 	memdef->adr[(memdef->size)++] = func;
 	
-	if ((*(tokens->firstTok + *curIndex))->type == Type_FUNC)
+	if ((*(tokens->firstTok + *curIndex))->type == Type_RET_VAL)
 	{
-	
+		TreeNode_t* retVal   = *(tokens->firstTok + *curIndex);		
+		(*curIndex)++;
 		TreeNode_t* funcName = *(tokens->firstTok + *curIndex);
 		(*curIndex)++;
 		
+		funcName->right = retVal;
+		retVal->parent  = funcName;
+
 		SYNTAXCTRL("bac");
 
 		TreeNode_t* arg = GetArg(tokens, curIndex, memdef);
@@ -340,6 +353,11 @@ TreeNode_t* GetFunc(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
 TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* param1 = NULL;
 
 	if ((*(tokens->firstTok + *curIndex))->type == Type_VAR || (*(tokens->firstTok + *curIndex))->type == Type_NUM)
@@ -380,6 +398,11 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetAssign(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* node1 = GetE(tokens, curIndex, memdef);
 	
 	if (STR_EQ("nshanakuma", (*(tokens->firstTok + *curIndex))->name))
@@ -417,6 +440,11 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetE(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* node1 = GetT(tokens, curIndex, memdef);
 	TreeNode_t* oper  = NULL;
 
@@ -438,8 +466,13 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 	return node1;
 }
 
- TreeNode_t* GetT(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+TreeNode_t* GetT(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* node1 = GetPow(tokens, curIndex, memdef);
 	TreeNode_t* oper  = NULL;
 
@@ -461,8 +494,13 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 	return node1;
 }
 
- TreeNode_t* GetPow(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
+TreeNode_t* GetPow(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* node1 = GetP(tokens, curIndex, memdef);
 
 	TreeNode_t* oper  = NULL;
@@ -487,6 +525,11 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetP(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	if (STR_EQ("bac", (*(tokens->firstTok + *curIndex))->name))
 	{
 		(*curIndex)++;
@@ -514,7 +557,7 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 	{
 		return GetScanf(tokens, curIndex, memdef);
 	}
-	else if ((*(tokens->firstTok + *curIndex))->type == Type_FUNC && !STR_EQ("main", (*(tokens->firstTok + *curIndex))->name))
+	else if ((*(tokens->firstTok + *curIndex))->type == Type_FUNC_NAME && !STR_EQ("main", (*(tokens->firstTok + *curIndex))->name))
 	{
 		return GetCall(tokens, curIndex, memdef);;
 	}
@@ -535,6 +578,11 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetWhile(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* whileNode = *(tokens->firstTok + *curIndex);
 	(*curIndex)++;
 
@@ -556,6 +604,11 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetIf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* ifNode = *(tokens->firstTok + *curIndex);
 	(*curIndex)++;
 
@@ -604,6 +657,11 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetRet(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* ret = *(tokens->firstTok + *curIndex);
 
 	if (STR_EQ("verj", (*(tokens->firstTok + *curIndex + 1))->name))
@@ -624,23 +682,28 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetDef(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
-		TreeNode_t* defNode = *(tokens->firstTok + *curIndex);
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
 
-		if ((*(tokens->firstTok + *curIndex + 1))->type != Type_VAR && (*(tokens->firstTok + *curIndex + 2))->type != Type_ASSIGN)
-		{
-			fprintf(stderr, "_VAR_ERR_: Wrong variable declaration in %lu\n", (*(tokens->firstTok + *curIndex))->lineIndex);
-			abort();
-		}
 
-		(*curIndex)++;
+	TreeNode_t* defNode = *(tokens->firstTok + *curIndex);
 
-		TreeNode_t* varName = *(tokens->firstTok + *curIndex);
-		defNode->left   = varName;
-		varName->parent = defNode;
+	if ((*(tokens->firstTok + *curIndex + 1))->type != Type_VAR && (*(tokens->firstTok + *curIndex + 2))->type != Type_ASSIGN)
+	{
+		fprintf(stderr, "_VAR_ERR_: Wrong variable declaration in %lu\n", (*(tokens->firstTok + *curIndex))->lineIndex);
+		abort();
+	}
 
-		(*curIndex)++;
+	(*curIndex)++;
 
-		return defNode;
+	TreeNode_t* varName = *(tokens->firstTok + *curIndex);
+	defNode->left   = varName;
+	varName->parent = defNode;
+
+	(*curIndex)++;
+
+	return defNode;
 }
 
  TreeNode_t* GetCall(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
@@ -681,6 +744,11 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetScanf(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
 	TreeNode_t* scan = *(tokens->firstTok + *curIndex);
 	(*curIndex)++;
 
@@ -697,11 +765,38 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetCond(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
-	return GetE(tokens, curIndex, memdef);
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
+
+	TreeNode_t* node1 = GetE(tokens, curIndex, memdef);
+	TreeNode_t* oper  = NULL;
+
+	while (STR_EQ("pakas", (*(tokens->firstTok + *curIndex))->name))
+	{
+		oper = *(tokens->firstTok + *curIndex);
+		(*curIndex)++;
+
+		TreeNode_t* node2 = GetE(tokens, curIndex, memdef);
+
+		oper->left    = node1;
+		oper->right   = node2;
+		node1->parent = oper;
+		node2->parent = oper;
+
+		node1 = oper;
+	}
+
+	return node1;
 }
 
  TreeNode_t* GetStat(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(curIndex);
+	assert(memdef);
+
 	TreeNode_t* node1 = GetAssign(tokens, curIndex, memdef);
 	TreeNode_t* stat1 = MakeNode(Type_STAT, Op_Null, 0, "ST", NULL, NULL);
 	memdef->adr[(memdef->size)++] = stat1;
@@ -737,6 +832,9 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  TreeNode_t* GetN(Tokens_t* tokens, size_t* curIndex)
 {
+	assert(tokens);
+	assert(curIndex);
+
 	if ((*(tokens->firstTok + *curIndex))->type != Type_NUM)
 	{
 		return NULL;
@@ -749,6 +847,9 @@ TreeNode_t* GetArg(Tokens_t* tokens, size_t* curIndex, MemDefender_t* memdef)
 
  void TokensDtor(Tokens_t* tokens, MemDefender_t* memdef)
 {
+	assert(tokens);
+	assert(memdef);
+
     for (size_t index = 0; index < tokens->nodeCount; index++)
 	{
         free(*(tokens->firstTok + index));

@@ -1,13 +1,13 @@
 #pragma once
-#include "tree/tree.h"
-#include "stack/stack.h"
-#include "filework/filework.h"
-#include "log/LOG.h"
+#include "book.h"
+#include "../tree/tree.h"
+#include "../filework/filework.h"
+#include "../log/LOG.h"
 #include <stdarg.h>
-#include "dsl.h"
+#include "../utils/dsl.h"
 #include <math.h>
 #include <assert.h>
-#include "book.h"
+#include "../standart/standart.h"
 
 const size_t TEXT_SIZE = 100;
 

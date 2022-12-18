@@ -74,7 +74,7 @@ int RunCpu(Cpu_t* cpu)
 {   
     ASSERT(cpu != NULL);
 
-    size_t ip = 0;
+    int ip = 0;
     
     while (ip <= cpu->size)
     {
@@ -142,7 +142,7 @@ int RunCpu(Cpu_t* cpu)
     return 0;
 } 
 
-arg_t GetPushArg(int command, size_t* ip, Cpu_t* cpu)
+arg_t GetPushArg(int command, int* ip, Cpu_t* cpu)
 {
     ASSERT(ip   != NULL);
     ASSERT(cpu  != NULL);
@@ -181,14 +181,14 @@ arg_t GetPushArg(int command, size_t* ip, Cpu_t* cpu)
 
     if (command & ARG_MEM)
     {
-        if ((size_t) arg > MAX_RAM_SIZE)
+        if ((int)arg > MAX_RAM_SIZE)
         {
             return POISON_ARG;
         }
 
         else
 		{
-            arg = cpu->RAM[(size_t) arg];
+            arg = cpu->RAM[(int) arg];
 		}
 
     }
@@ -203,12 +203,12 @@ arg_t GetPushArg(int command, size_t* ip, Cpu_t* cpu)
     return arg;
 }
 
-arg_t* GetPopArg(int command, size_t* ip, Cpu_t* cpu)
+arg_t* GetPopArg(int command, int* ip, Cpu_t* cpu)
 {
     ASSERT(ip   != NULL);
     ASSERT(cpu  != NULL);
 
-    size_t arg    = 0; 
+    int arg    = 0; 
     int    value  = 0;
     int    curReg = 0; 
 
@@ -220,7 +220,7 @@ arg_t* GetPopArg(int command, size_t* ip, Cpu_t* cpu)
             memcpy(&value, cpu->cmdArr + *ip, sizeof(int));
             *ip += sizeof(int);
             
-            arg += (size_t) value;
+            arg += (int) value;
         }
 
         if (command & ARG_REG)
@@ -258,7 +258,7 @@ arg_t* GetPopArg(int command, size_t* ip, Cpu_t* cpu)
     return NULL;
 }
 
-int GetJumpArg(size_t* ip, Cpu_t* cpu)
+int GetJumpArg(int* ip, Cpu_t* cpu)
 {
     ASSERT(ip  != NULL);
     ASSERT(cpu != NULL);
@@ -271,17 +271,17 @@ int GetJumpArg(size_t* ip, Cpu_t* cpu)
         return 1;
     }
 
-    *ip = (size_t) arg - 1;
+    *ip = (int) arg - 1;
 
     return 0;
 }
 
-void CpuDump(Cpu_t* cpu, size_t ip)
+void CpuDump(Cpu_t* cpu, int ip)
 {
     printf("-----------------------------------CPU DUMP-----------------------------------\n");
 
     
-    for (size_t index = 0; index < cpu->size; ++index)
+    for (int index = 0; index < cpu->size; ++index)
     {   
         if (index == ip)
         {
@@ -310,7 +310,7 @@ void CpuDump(Cpu_t* cpu, size_t ip)
     printf("                            REGISTERS:\n");
     printf("REG:  VALUE:\n");
 
-    for (size_t index = 1; index < REGS_COUNT; ++index)
+    for (int index = 1; index < REGS_COUNT; ++index)
     {
         printf("R%cX %lf\n", 'A' + index - 1, cpu->regs[index]);
     }
@@ -320,7 +320,7 @@ void CpuDump(Cpu_t* cpu, size_t ip)
 
     printf("                            RAM:\n");
 
-    for (size_t index = 0; index < MAX_RAM_SIZE; ++index)
+    for (int index = 0; index < MAX_RAM_SIZE; ++index)
     {
         printf("%3lg ", cpu->RAM[index]);
 

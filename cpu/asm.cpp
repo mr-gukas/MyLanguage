@@ -52,7 +52,7 @@ int asmCtor(AsmCmd_t* asmCmd, FILE* source)
     asmCmd->info.nCmd  = asmCmd->commands.nLines - 1;
     asmCmd->asmArr     = (unsigned char*) calloc(asmCmd->info.nCmd * 2, sizeof(arg_t));
     
-    for (size_t index = 0; index < MAX_LABEL_COUNT; ++index)
+    for (int index = 0; index < MAX_LABEL_COUNT; ++index)
     {
         asmCmd->labels[index].address = POISON_ARG; 
         strncpy(asmCmd->labels[index].name, POISON_NAME, LABEL_SIZE);
@@ -78,8 +78,8 @@ int asmMakeArr(AsmCmd_t* asmCmd)
 {
     ASSERT(asmCmd != NULL);
 
-    size_t index = 0;
-    size_t ip    = 0;
+    int index = 0;
+    int ip    = 0;
     
     fprintf(asmCmd->listfile, "\n\n---------------------COMMAND LIST---------------------\n");
 
@@ -174,7 +174,7 @@ int IsRegister(const char* reg)
     return -1;
 }
 
-int MakeArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
+int MakeArg(char* line, int command, AsmCmd_t* asmCmd, int* ip)
 {
     ASSERT(line   != NULL);
     ASSERT(asmCmd != NULL);
@@ -227,7 +227,7 @@ int isInBrackets(char* arg)
     return 1;
 }
 
-int MakeCommonArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
+int MakeCommonArg(char* line, int command, AsmCmd_t* asmCmd, int* ip)
 {
     ASSERT(line   != NULL);
     ASSERT(asmCmd != NULL);
@@ -287,7 +287,7 @@ int MakeCommonArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
     return 0;
 }
 
-int MakeBracketsArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
+int MakeBracketsArg(char* line, int command, AsmCmd_t* asmCmd, int* ip)
 {
     ASSERT(line   != NULL);
     ASSERT(asmCmd != NULL);
@@ -365,7 +365,7 @@ int MakeBracketsArg(char* line, int command, AsmCmd_t* asmCmd, size_t* ip)
     return 0;
 }
 
-int LabelAnalyze(char* cmd, AsmCmd_t* asmCmd, size_t ip)
+int LabelAnalyze(char* cmd, AsmCmd_t* asmCmd, int ip)
 {
     ASSERT(cmd    != NULL);
     ASSERT(asmCmd != NULL);
@@ -389,7 +389,7 @@ int LabelAnalyze(char* cmd, AsmCmd_t* asmCmd, size_t ip)
     {
         int labelCtrl = 1;
         
-        for (size_t num = 0; num < MAX_LABEL_COUNT; ++num)
+        for (int num = 0; num < MAX_LABEL_COUNT; ++num)
         {
             char* dbDot = strchr(curTextLabel, ':');
             if (dbDot) *dbDot = '\0';
@@ -418,7 +418,7 @@ int LabelAnalyze(char* cmd, AsmCmd_t* asmCmd, size_t ip)
     return 0;
 }
 
-int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, size_t *ip)
+int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, int *ip)
 {
     ASSERT(line   != NULL);
     ASSERT(asmCmd != NULL);
@@ -459,7 +459,7 @@ int MakeJumpArg(char* line, int command, AsmCmd_t* asmCmd, size_t *ip)
         
         else if (sscanf(line, " :%s", curTextLabel) == 1)
         {
-            for (size_t num = 0; num < MAX_LABEL_COUNT; ++num)
+            for (int num = 0; num < MAX_LABEL_COUNT; ++num)
             {
                 if (strcmp(asmCmd->labels[num].name, curTextLabel) == 0)
                 {

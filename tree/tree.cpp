@@ -163,7 +163,9 @@ int TreeVerify(Tree_t* tree)
 
 int NodeDump(TreeNode_t* node, int* nodeCount, FILE* file)
 {
-	ASSERT(node != NULL && nodeCount != NULL && file != NULL);
+	ASSERT(node      != NULL);
+	ASSERT(nodeCount != NULL);
+	ASSERT(file      != NULL);
 	
 	int leftNum  = 0;
 	int rightNum = 0;
@@ -180,14 +182,15 @@ int NodeDump(TreeNode_t* node, int* nodeCount, FILE* file)
 
 	fprintf(file, "\"node%d\" [fillcolor=", *nodeCount);
 	
-	if       (node->type == Type_OP)				fprintf(file, "\"#AADEE2\", label=\"");
-	else if  (node->type == Type_VAR)				fprintf(file, "\"#FFB2D0\", label=\"");
-	else if  (node->type == Type_NUM)				fprintf(file, "\"#98FF98\", label=\"");
-	else if  (node->type == Type_STAT)				fprintf(file, "\"#C0C0C0\", label=\"");
-	else if  (node->parent->type == Type_FUNC)		fprintf(file, "\"#0BDA51\", label=\"");
+	if       (node->type == Type_OP)				               fprintf(file, "\"#AADEE2\", label=\"");
+	else if  (node->type == Type_VAR)					   		   fprintf(file, "\"#FFB2D0\", label=\"");
+	else if  (node->type == Type_NUM)							   fprintf(file, "\"#98FF98\", label=\"");
+	else if	 (node->type == Type_RET_VAL)                          fprintf(file, "\"#E3D2B1\", label=\"");
+	else if  (node->type == Type_STAT || node->type == Type_PARAM) fprintf(file, "\"#C0C0C0\", label=\"");
+	else if  (node->parent->type == Type_FUNC)	                   fprintf(file, "\"#0BDA51\", label=\"");
 	else if  (node->type == Type_DEF || node->type == Type_ASSIGN) fprintf(file, "\"#FD5E53\", label=\"");
-	else if  (node->type == Type_RETURN)				fprintf(file, "\"#7851A9\", label=\"");
-	else if  (node->type == Type_OP)				fprintf(file, "\"#AADEE2\", label=\"");
+	else if  (node->type == Type_RETURN)						   fprintf(file, "\"#7851A9\", label=\"");
+	else if  (node->type == Type_OP)						   	   fprintf(file, "\"#AADEE2\", label=\"");
 
 	else fprintf(file, "\"#EFAF8C\", label=\"");
 
@@ -204,6 +207,7 @@ int NodeDump(TreeNode_t* node, int* nodeCount, FILE* file)
 			case Op_Sin: fprintf(file, "sin"); break;
 			case Op_Cos: fprintf(file, "cos"); break;
 			case Op_Pow: fprintf(file, "^");   break;
+			case Op_IsBt:fprintf(file, "&lt;"); break;
 
 			default: fprintf(file, "?");
 		}

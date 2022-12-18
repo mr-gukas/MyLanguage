@@ -87,6 +87,8 @@ enum NodeType
 	Type_DEF,
 	Type_PRINTF,
 	Type_SCANF,
+	Type_RET_VAL,
+	Type_FUNC_NAME,
 };
 
 enum OperationType
@@ -106,6 +108,7 @@ enum OperationType
 	Op_Cos  = 10,
 
 	Op_Pow  = 12,
+	Op_IsBt = 14,
 };
 
 struct TreeNode_t

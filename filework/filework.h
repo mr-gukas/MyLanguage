@@ -7,6 +7,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <assert.h>
+
 
 #ifndef ASSERT
 #define ASSERT ;
@@ -39,3 +41,4 @@ void matchLines(TEXT* text);
 
 void textDtor(TEXT* text); 
 
+char* SkipSpaces(char** src, size_t* lineIndex);

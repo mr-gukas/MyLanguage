@@ -5,205 +5,391 @@
 0000  |  CALL :main       |  11 13A 
 0005  |  HLT              |  00 
 0006  |                   |  
-0006  |  fuck:            |  
-0006  |  PUSH [0+RAX]     |  E1 00 01 
-000F  |  PUSH 1           |  21 1
-0018  |  SUB              |  03 
-0019  |  PUSH 0           |  21 0
-0022  |                   |  
-0022  |  JE :else_0       |  0D 06 
-0027  |  PUSH RAX         |  41 01
-002C  |  PUSH 1           |  21 1
-0035  |  ADD              |  02 
-0036  |  POP RAX          |  49 01
-003B  |                   |  
-003B  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
-0044  |  PUSH 1           |  21 1
-004D  |  SUB              |  03 
-004E  |  //new            |  
-004E  |  POP [0+RAX]      |  E9 00 01 
-0057  |                   |  
-0057  |  PUSH [0+RAX]     |  E1 00 01 
-0060  |                   |  
-0060  |  PUSH RAX         |  41 01
-0065  |  PUSH 1           |  21 1
-006E  |  ADD              |  02 
-006F  |  POP RAX          |  49 01
-0074  |  POP [0+RAX]      |  E9 00 01 
-007D  |                   |  
-007D  |  CALL :fuck       |  11 06 
-0082  |                   |  
-0082  |  PUSH RAX         |  41 01
-0087  |  PUSH 1           |  21 1
-0090  |  SUB              |  03 
-0091  |  POP RAX          |  49 01
-0096  |  PUSH RCX         |  41 03
-009B  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
-00A4  |  MUL              |  04 
-00A5  |  POP RCX          |  49 03
-00AA  |  PUSH RAX         |  41 01
-00AF  |  PUSH 1           |  21 1
-00B8  |  SUB              |  03 
-00B9  |  POP RAX          |  49 01
-00BE  |                   |  
-00BE  |  RET              |  17 
-00BF  |                   |  
-00BF  |  PUSH 0           |  21 0
-00C8  |  POP RAX          |  49 01
-00CD  |                   |  
-00CD  |  JMP :if_0        |  0A 06 
-00D2  |                   |  
-00D2  |  else_0:          |  
-00D2  |  PUSH RAX         |  41 01
-00D7  |  PUSH 1           |  21 1
-00E0  |  ADD              |  02 
-00E1  |  POP RAX          |  49 01
-00E6  |                   |  
-00E6  |  PUSH 1           |  21 1
-00EF  |  POP RCX          |  49 03
-00F4  |  PUSH RAX         |  41 01
-00F9  |  PUSH 1           |  21 1
-0102  |  SUB              |  03 
-0103  |  POP RAX          |  49 01
-0108  |                   |  
-0108  |  RET              |  17 
-0109  |                   |  
-0109  |  PUSH 0           |  21 0
-0112  |  POP RAX          |  49 01
-0117  |                   |  
-0117  |  if_0:            |  
-0117  |                   |  
-0117  |  main:            |  
-0117  |  PUSH 0           |  21 0
-0120  |  //vova           |  
-0120  |  POP [0+RAX]      |  E9 00 01 
-0129  |                   |  
-0129  |  INP              |  07 
-012A  |  POP [0+RAX]      |  E9 00 01 
-0133  |  PUSH [0+RAX]     |  E1 00 01 
-013C  |                   |  
-013C  |  PUSH RAX         |  41 01
-0141  |  PUSH 2           |  21 2
-014A  |  ADD              |  02 
-014B  |  POP RAX          |  49 01
-0150  |  POP [0+RAX]      |  E9 00 01 
-0159  |                   |  
-0159  |  CALL :fuck       |  11 06 
-015E  |                   |  
-015E  |  PUSH RAX         |  41 01
-0163  |  PUSH 2           |  21 2
-016C  |  SUB              |  03 
-016D  |  POP RAX          |  49 01
-0172  |  PUSH RCX         |  41 03
-0177  |  //vitya          |  
-0177  |  POP [1+RAX]      |  E9 01 01 
-0180  |                   |  
-0180  |  PUSH [1+RAX]     |  E1 01 01 
-0189  |  OUT              |  06 
-018A  |  PUSH 0           |  21 0
-0193  |                   |  
-0193  |  RET              |  17 
+0006  |  main:            |  
+0006  |  PUSH 0           |  21 0
+000F  |  //ded            |  
+000F  |  POP [0+RAX]      |  E9 00 01 
+0018  |                   |  
+0018  |  INP              |  07 
+0019  |  POP [0+RAX]      |  E9 00 01 
+0022  |  PUSH 0           |  21 0
+002B  |  //otec           |  
+002B  |  POP [1+RAX]      |  E9 01 01 
+0034  |                   |  
+0034  |  INP              |  07 
+0035  |  POP [1+RAX]      |  E9 01 01 
+003E  |  PUSH 0           |  21 0
+0047  |  //brat           |  
+0047  |  POP [2+RAX]      |  E9 02 01 
+0050  |                   |  
+0050  |  INP              |  07 
+0051  |  POP [2+RAX]      |  E9 02 01 
+005A  |  PUSH 0           |  21 0
+0063  |  //greatded       |  
+0063  |  POP [3+RAX]      |  E9 03 01 
+006C  |                   |  
+006C  |  PUSH 0           |  21 0
+0075  |  //greatbab       |  
+0075  |  POP [4+RAX]      |  E9 04 01 
+007E  |                   |  
+007E  |  PUSH [0+RAX]     |  E1 00 01 
+0087  |  PUSH 0           |  21 0
+0090  |                   |  
+0090  |  JE :else_0       |  0D 06 
+0095  |  PUSH RAX         |  41 01
+009A  |  PUSH 5           |  21 5
+00A3  |  ADD              |  02 
+00A4  |  POP RAX          |  49 01
+00A9  |                   |  
+00A9  |  PUSH [-4+RAX]    |  E1 FFFFFFFC 01 
+00B2  |  PUSH 2           |  21 2
+00BB  |  POW              |  14 
+00BC  |  PUSH 4           |  21 4
+00C5  |  PUSH [-5+RAX]    |  E1 FFFFFFFB 01 
+00CE  |  MUL              |  04 
+00CF  |  PUSH [-3+RAX]    |  E1 FFFFFFFD 01 
+00D8  |  MUL              |  04 
+00D9  |  SUB              |  03 
+00DA  |  //godfather      |  
+00DA  |  POP [0+RAX]      |  E9 00 01 
+00E3  |                   |  
+00E3  |  PUSH [0+RAX]     |  E1 00 01 
+00EC  |  PUSH 0           |  21 0
+00F5  |  ISBT             |  18 
+00F6  |  PUSH 0           |  21 0
+00FF  |                   |  
+00FF  |  JE :else_0       |  0D 06 
+0104  |  PUSH RAX         |  41 01
+0109  |  PUSH 1           |  21 1
+0112  |  ADD              |  02 
+0113  |  POP RAX          |  49 01
+0118  |                   |  
+0118  |  PUSH -1          |  21 -1
+0121  |  PUSH [-5+RAX]    |  E1 FFFFFFFB 01 
+012A  |  MUL              |  04 
+012B  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
+0134  |  PUSH 0.5         |  21 0.5
+013D  |  POW              |  14 
+013E  |  ADD              |  02 
+013F  |  PUSH 2           |  21 2
+0148  |  PUSH [-6+RAX]    |  E1 FFFFFFFA 01 
+0151  |  MUL              |  04 
+0152  |  DIV              |  05 
+0153  |  //greatded       |  
+0153  |  POP [-3+RAX]     |  E9 FFFFFFFD 01 
+015C  |  PUSH [-3+RAX]    |  E1 FFFFFFFD 01 
+0165  |  OUT              |  06 
+0166  |  PUSH -1          |  21 -1
+016F  |  PUSH [-5+RAX]    |  E1 FFFFFFFB 01 
+0178  |  MUL              |  04 
+0179  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
+0182  |  PUSH 0.5         |  21 0.5
+018B  |  POW              |  14 
+018C  |  SUB              |  03 
+018D  |  PUSH 2           |  21 2
+0196  |  PUSH [-6+RAX]    |  E1 FFFFFFFA 01 
+019F  |  MUL              |  04 
+01A0  |  DIV              |  05 
+01A1  |  //greatbab       |  
+01A1  |  POP [-2+RAX]     |  E9 FFFFFFFE 01 
+01AA  |  PUSH [-2+RAX]    |  E1 FFFFFFFE 01 
+01B3  |  OUT              |  06 
+01B4  |  PUSH 1           |  21 1
+01BD  |  POP RCX          |  49 03
+01C2  |  PUSH RAX         |  41 01
+01C7  |  PUSH 1           |  21 1
+01D0  |  SUB              |  03 
+01D1  |  POP RAX          |  49 01
+01D6  |                   |  
+01D6  |  RET              |  17 
+01D7  |                   |  
+01D7  |  PUSH 5           |  21 5
+01E0  |  POP RAX          |  49 01
+01E5  |                   |  
+01E5  |  JMP :if_0        |  0A 06 
+01EA  |                   |  
+01EA  |  else_0:          |  
+01EA  |  PUSH RAX         |  41 01
+01EF  |  PUSH 1           |  21 1
+01F8  |  ADD              |  02 
+01F9  |  POP RAX          |  49 01
+01FE  |                   |  
+01FE  |  PUSH 1           |  21 1
+0207  |  POP RCX          |  49 03
+020C  |  PUSH RAX         |  41 01
+0211  |  PUSH 1           |  21 1
+021A  |  SUB              |  03 
+021B  |  POP RAX          |  49 01
+0220  |                   |  
+0220  |  RET              |  17 
+0221  |                   |  
+0221  |  PUSH 5           |  21 5
+022A  |  POP RAX          |  49 01
+022F  |                   |  
+022F  |  if_0:            |  
+022F  |  PUSH 0           |  21 0
+0238  |  POP RAX          |  49 01
+023D  |                   |  
+023D  |  JMP :if_1        |  0A 06 
+0242  |                   |  
+0242  |  else_1:          |  
+0242  |  PUSH RAX         |  41 01
+0247  |  PUSH 5           |  21 5
+0250  |  ADD              |  02 
+0251  |  POP RAX          |  49 01
+0256  |                   |  
+0256  |  PUSH [-4+RAX]    |  E1 FFFFFFFC 01 
+025F  |  PUSH 0           |  21 0
+0268  |                   |  
+0268  |  JE :else_1       |  0D 242 
+026D  |  PUSH RAX         |  41 01
+0272  |  PUSH 0           |  21 0
+027B  |  ADD              |  02 
+027C  |  POP RAX          |  49 01
+0281  |                   |  
+0281  |  PUSH -1          |  21 -1
+028A  |  PUSH [-3+RAX]    |  E1 FFFFFFFD 01 
+0293  |  MUL              |  04 
+0294  |  PUSH [-4+RAX]    |  E1 FFFFFFFC 01 
+029D  |  DIV              |  05 
+029E  |  //greatded       |  
+029E  |  POP [-2+RAX]     |  E9 FFFFFFFE 01 
+02A7  |  PUSH [-2+RAX]    |  E1 FFFFFFFE 01 
+02B0  |  OUT              |  06 
+02B1  |  PUSH 1           |  21 1
+02BA  |  POP RCX          |  49 03
+02BF  |  PUSH RAX         |  41 01
+02C4  |  PUSH 0           |  21 0
+02CD  |  SUB              |  03 
+02CE  |  POP RAX          |  49 01
+02D3  |                   |  
+02D3  |  RET              |  17 
+02D4  |                   |  
+02D4  |  PUSH 5           |  21 5
+02DD  |  POP RAX          |  49 01
+02E2  |                   |  
+02E2  |  JMP :if_1        |  0A 06 
+02E7  |                   |  
+02E7  |  else_1:          |  
+02E7  |  PUSH RAX         |  41 01
+02EC  |  PUSH 0           |  21 0
+02F5  |  ADD              |  02 
+02F6  |  POP RAX          |  49 01
+02FB  |                   |  
+02FB  |  PUSH 1           |  21 1
+0304  |  POP RCX          |  49 03
+0309  |  PUSH RAX         |  41 01
+030E  |  PUSH 0           |  21 0
+0317  |  SUB              |  03 
+0318  |  POP RAX          |  49 01
+031D  |                   |  
+031D  |  RET              |  17 
+031E  |                   |  
+031E  |  PUSH 5           |  21 5
+0327  |  POP RAX          |  49 01
+032C  |                   |  
+032C  |  if_1:            |  
+032C  |  PUSH 0           |  21 0
+0335  |  POP RAX          |  49 01
+033A  |                   |  
+033A  |  if_2:            |  
+033A  |  PUSH 0           |  21 0
+0343  |                   |  
+0343  |  RET              |  17 
 
 ---------------------COMMAND LIST---------------------
 
-0000  |  CALL :main       |  11 117 
+0000  |  CALL :main       |  11 06 
 0005  |  HLT              |  00 
 0006  |                   |  
-0006  |  fuck:            |  
-0006  |  PUSH [0+RAX]     |  E1 00 01 
-000F  |  PUSH 1           |  21 1
-0018  |  SUB              |  03 
-0019  |  PUSH 0           |  21 0
-0022  |                   |  
-0022  |  JE :else_0       |  0D D2 
-0027  |  PUSH RAX         |  41 01
-002C  |  PUSH 1           |  21 1
-0035  |  ADD              |  02 
-0036  |  POP RAX          |  49 01
-003B  |                   |  
-003B  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
-0044  |  PUSH 1           |  21 1
-004D  |  SUB              |  03 
-004E  |  //new            |  
-004E  |  POP [0+RAX]      |  E9 00 01 
-0057  |                   |  
-0057  |  PUSH [0+RAX]     |  E1 00 01 
-0060  |                   |  
-0060  |  PUSH RAX         |  41 01
-0065  |  PUSH 1           |  21 1
-006E  |  ADD              |  02 
-006F  |  POP RAX          |  49 01
-0074  |  POP [0+RAX]      |  E9 00 01 
-007D  |                   |  
-007D  |  CALL :fuck       |  11 06 
-0082  |                   |  
-0082  |  PUSH RAX         |  41 01
-0087  |  PUSH 1           |  21 1
-0090  |  SUB              |  03 
-0091  |  POP RAX          |  49 01
-0096  |  PUSH RCX         |  41 03
-009B  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
-00A4  |  MUL              |  04 
-00A5  |  POP RCX          |  49 03
-00AA  |  PUSH RAX         |  41 01
-00AF  |  PUSH 1           |  21 1
-00B8  |  SUB              |  03 
-00B9  |  POP RAX          |  49 01
-00BE  |                   |  
-00BE  |  RET              |  17 
-00BF  |                   |  
-00BF  |  PUSH 0           |  21 0
-00C8  |  POP RAX          |  49 01
-00CD  |                   |  
-00CD  |  JMP :if_0        |  0A 117 
-00D2  |                   |  
-00D2  |  else_0:          |  
-00D2  |  PUSH RAX         |  41 01
-00D7  |  PUSH 1           |  21 1
-00E0  |  ADD              |  02 
-00E1  |  POP RAX          |  49 01
-00E6  |                   |  
-00E6  |  PUSH 1           |  21 1
-00EF  |  POP RCX          |  49 03
-00F4  |  PUSH RAX         |  41 01
-00F9  |  PUSH 1           |  21 1
-0102  |  SUB              |  03 
-0103  |  POP RAX          |  49 01
-0108  |                   |  
-0108  |  RET              |  17 
-0109  |                   |  
-0109  |  PUSH 0           |  21 0
-0112  |  POP RAX          |  49 01
-0117  |                   |  
-0117  |  if_0:            |  
-0117  |                   |  
-0117  |  main:            |  
-0117  |  PUSH 0           |  21 0
-0120  |  //vova           |  
-0120  |  POP [0+RAX]      |  E9 00 01 
-0129  |                   |  
-0129  |  INP              |  07 
-012A  |  POP [0+RAX]      |  E9 00 01 
-0133  |  PUSH [0+RAX]     |  E1 00 01 
-013C  |                   |  
-013C  |  PUSH RAX         |  41 01
-0141  |  PUSH 2           |  21 2
-014A  |  ADD              |  02 
-014B  |  POP RAX          |  49 01
-0150  |  POP [0+RAX]      |  E9 00 01 
-0159  |                   |  
-0159  |  CALL :fuck       |  11 06 
-015E  |                   |  
-015E  |  PUSH RAX         |  41 01
-0163  |  PUSH 2           |  21 2
-016C  |  SUB              |  03 
-016D  |  POP RAX          |  49 01
-0172  |  PUSH RCX         |  41 03
-0177  |  //vitya          |  
-0177  |  POP [1+RAX]      |  E9 01 01 
-0180  |                   |  
-0180  |  PUSH [1+RAX]     |  E1 01 01 
-0189  |  OUT              |  06 
-018A  |  PUSH 0           |  21 0
-0193  |                   |  
-0193  |  RET              |  17 
+0006  |  main:            |  
+0006  |  PUSH 0           |  21 0
+000F  |  //ded            |  
+000F  |  POP [0+RAX]      |  E9 00 01 
+0018  |                   |  
+0018  |  INP              |  07 
+0019  |  POP [0+RAX]      |  E9 00 01 
+0022  |  PUSH 0           |  21 0
+002B  |  //otec           |  
+002B  |  POP [1+RAX]      |  E9 01 01 
+0034  |                   |  
+0034  |  INP              |  07 
+0035  |  POP [1+RAX]      |  E9 01 01 
+003E  |  PUSH 0           |  21 0
+0047  |  //brat           |  
+0047  |  POP [2+RAX]      |  E9 02 01 
+0050  |                   |  
+0050  |  INP              |  07 
+0051  |  POP [2+RAX]      |  E9 02 01 
+005A  |  PUSH 0           |  21 0
+0063  |  //greatded       |  
+0063  |  POP [3+RAX]      |  E9 03 01 
+006C  |                   |  
+006C  |  PUSH 0           |  21 0
+0075  |  //greatbab       |  
+0075  |  POP [4+RAX]      |  E9 04 01 
+007E  |                   |  
+007E  |  PUSH [0+RAX]     |  E1 00 01 
+0087  |  PUSH 0           |  21 0
+0090  |                   |  
+0090  |  JE :else_0       |  0D 1EA 
+0095  |  PUSH RAX         |  41 01
+009A  |  PUSH 5           |  21 5
+00A3  |  ADD              |  02 
+00A4  |  POP RAX          |  49 01
+00A9  |                   |  
+00A9  |  PUSH [-4+RAX]    |  E1 FFFFFFFC 01 
+00B2  |  PUSH 2           |  21 2
+00BB  |  POW              |  14 
+00BC  |  PUSH 4           |  21 4
+00C5  |  PUSH [-5+RAX]    |  E1 FFFFFFFB 01 
+00CE  |  MUL              |  04 
+00CF  |  PUSH [-3+RAX]    |  E1 FFFFFFFD 01 
+00D8  |  MUL              |  04 
+00D9  |  SUB              |  03 
+00DA  |  //godfather      |  
+00DA  |  POP [0+RAX]      |  E9 00 01 
+00E3  |                   |  
+00E3  |  PUSH [0+RAX]     |  E1 00 01 
+00EC  |  PUSH 0           |  21 0
+00F5  |  ISBT             |  18 
+00F6  |  PUSH 0           |  21 0
+00FF  |                   |  
+00FF  |  JE :else_0       |  0D 1EA 
+0104  |  PUSH RAX         |  41 01
+0109  |  PUSH 1           |  21 1
+0112  |  ADD              |  02 
+0113  |  POP RAX          |  49 01
+0118  |                   |  
+0118  |  PUSH -1          |  21 -1
+0121  |  PUSH [-5+RAX]    |  E1 FFFFFFFB 01 
+012A  |  MUL              |  04 
+012B  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
+0134  |  PUSH 0.5         |  21 0.5
+013D  |  POW              |  14 
+013E  |  ADD              |  02 
+013F  |  PUSH 2           |  21 2
+0148  |  PUSH [-6+RAX]    |  E1 FFFFFFFA 01 
+0151  |  MUL              |  04 
+0152  |  DIV              |  05 
+0153  |  //greatded       |  
+0153  |  POP [-3+RAX]     |  E9 FFFFFFFD 01 
+015C  |  PUSH [-3+RAX]    |  E1 FFFFFFFD 01 
+0165  |  OUT              |  06 
+0166  |  PUSH -1          |  21 -1
+016F  |  PUSH [-5+RAX]    |  E1 FFFFFFFB 01 
+0178  |  MUL              |  04 
+0179  |  PUSH [-1+RAX]    |  E1 FFFFFFFF 01 
+0182  |  PUSH 0.5         |  21 0.5
+018B  |  POW              |  14 
+018C  |  SUB              |  03 
+018D  |  PUSH 2           |  21 2
+0196  |  PUSH [-6+RAX]    |  E1 FFFFFFFA 01 
+019F  |  MUL              |  04 
+01A0  |  DIV              |  05 
+01A1  |  //greatbab       |  
+01A1  |  POP [-2+RAX]     |  E9 FFFFFFFE 01 
+01AA  |  PUSH [-2+RAX]    |  E1 FFFFFFFE 01 
+01B3  |  OUT              |  06 
+01B4  |  PUSH 1           |  21 1
+01BD  |  POP RCX          |  49 03
+01C2  |  PUSH RAX         |  41 01
+01C7  |  PUSH 1           |  21 1
+01D0  |  SUB              |  03 
+01D1  |  POP RAX          |  49 01
+01D6  |                   |  
+01D6  |  RET              |  17 
+01D7  |                   |  
+01D7  |  PUSH 5           |  21 5
+01E0  |  POP RAX          |  49 01
+01E5  |                   |  
+01E5  |  JMP :if_0        |  0A 22F 
+01EA  |                   |  
+01EA  |  else_0:          |  
+01EA  |  PUSH RAX         |  41 01
+01EF  |  PUSH 1           |  21 1
+01F8  |  ADD              |  02 
+01F9  |  POP RAX          |  49 01
+01FE  |                   |  
+01FE  |  PUSH 1           |  21 1
+0207  |  POP RCX          |  49 03
+020C  |  PUSH RAX         |  41 01
+0211  |  PUSH 1           |  21 1
+021A  |  SUB              |  03 
+021B  |  POP RAX          |  49 01
+0220  |                   |  
+0220  |  RET              |  17 
+0221  |                   |  
+0221  |  PUSH 5           |  21 5
+022A  |  POP RAX          |  49 01
+022F  |                   |  
+022F  |  if_0:            |  
+022F  |  PUSH 0           |  21 0
+0238  |  POP RAX          |  49 01
+023D  |                   |  
+023D  |  JMP :if_1        |  0A 32C 
+0242  |                   |  
+0242  |  else_1:          |  
+0242  |  PUSH RAX         |  41 01
+0247  |  PUSH 5           |  21 5
+0250  |  ADD              |  02 
+0251  |  POP RAX          |  49 01
+0256  |                   |  
+0256  |  PUSH [-4+RAX]    |  E1 FFFFFFFC 01 
+025F  |  PUSH 0           |  21 0
+0268  |                   |  
+0268  |  JE :else_1       |  0D 242 
+026D  |  PUSH RAX         |  41 01
+0272  |  PUSH 0           |  21 0
+027B  |  ADD              |  02 
+027C  |  POP RAX          |  49 01
+0281  |                   |  
+0281  |  PUSH -1          |  21 -1
+028A  |  PUSH [-3+RAX]    |  E1 FFFFFFFD 01 
+0293  |  MUL              |  04 
+0294  |  PUSH [-4+RAX]    |  E1 FFFFFFFC 01 
+029D  |  DIV              |  05 
+029E  |  //greatded       |  
+029E  |  POP [-2+RAX]     |  E9 FFFFFFFE 01 
+02A7  |  PUSH [-2+RAX]    |  E1 FFFFFFFE 01 
+02B0  |  OUT              |  06 
+02B1  |  PUSH 1           |  21 1
+02BA  |  POP RCX          |  49 03
+02BF  |  PUSH RAX         |  41 01
+02C4  |  PUSH 0           |  21 0
+02CD  |  SUB              |  03 
+02CE  |  POP RAX          |  49 01
+02D3  |                   |  
+02D3  |  RET              |  17 
+02D4  |                   |  
+02D4  |  PUSH 5           |  21 5
+02DD  |  POP RAX          |  49 01
+02E2  |                   |  
+02E2  |  JMP :if_1        |  0A 32C 
+02E7  |                   |  
+02E7  |  else_1:          |  
+02E7  |  PUSH RAX         |  41 01
+02EC  |  PUSH 0           |  21 0
+02F5  |  ADD              |  02 
+02F6  |  POP RAX          |  49 01
+02FB  |                   |  
+02FB  |  PUSH 1           |  21 1
+0304  |  POP RCX          |  49 03
+0309  |  PUSH RAX         |  41 01
+030E  |  PUSH 0           |  21 0
+0317  |  SUB              |  03 
+0318  |  POP RAX          |  49 01
+031D  |                   |  
+031D  |  RET              |  17 
+031E  |                   |  
+031E  |  PUSH 5           |  21 5
+0327  |  POP RAX          |  49 01
+032C  |                   |  
+032C  |  if_1:            |  
+032C  |  PUSH 0           |  21 0
+0335  |  POP RAX          |  49 01
+033A  |                   |  
+033A  |  if_2:            |  
+033A  |  PUSH 0           |  21 0
+0343  |                   |  
+0343  |  RET              |  17 

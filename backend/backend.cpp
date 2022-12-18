@@ -1,5 +1,28 @@
 #include "backend.h"
 
+#ifdef LOG_MODE
+    FILE* LogFile = startLog(LogFile);
+#endif
+int main(void)
+{
+	Tree_t  stTree = {};
+
+	FILE* standart = fopen("obj/standart.txt", "r");
+
+	assert(standart);
+
+	stTree.root = ReadStandart(standart);
+	fclose(standart);
+	TreeUpdate(&stTree, stTree.root);
+	TreeDump(&stTree);
+	WriteAsmCode(stTree.root);
+
+#ifdef LOG_MODE
+    endLog(LogFile);
+#endif
+	return 0;
+}
+
 int WriteAsmCode(TreeNode_t* root)
 {
 	assert(root); 
@@ -133,6 +156,12 @@ int ParseFunc(TreeNode_t* node, Program_t* program)
 	}
 
 	(program->funcArr[program->funcCount]).name = node->left->name;
+
+	if (STR_EQ(node->left->right->name, "krknaki"))
+		(program->funcArr[program->funcCount]).retVal = DOUBLE;
+	else
+		(program->funcArr[program->funcCount]).retVal = VOID;
+
 	
 	fprintf(program->asmFile, "\n%s:\n", node->left->name);
 	
@@ -375,7 +404,7 @@ int ParseIf(TreeNode_t* node, Program_t* program)
 	
 	CountExpression(node->left, program);
 	fprintf(program->asmFile, "PUSH 0\n");
-
+	
 	if (node->right->type != Type_ELSE)
 	{
 		fprintf(program->asmFile, "\nJE :if_%lu\n", program->ifCounter);
@@ -523,6 +552,7 @@ void CountExpression(TreeNode_t* node, Program_t* program)
 			case Op_Pow: fprintf(program->asmFile, "POW\n"); break;
 			case Op_Sin: fprintf(program->asmFile, "ADD\n"); break;
 			case Op_Cos: fprintf(program->asmFile, "COS\n"); break;
+			case Op_IsBt: fprintf(program->asmFile, "ISBT\n"); break;
 			case Op_Ln:  fprintf(program->asmFile, "LN\n"); break;
 			
 			default: break;

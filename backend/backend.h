@@ -2,7 +2,7 @@
 
 #include "stack/stack.h"
 #include "../tree/tree.h"
-#include "../parser.h"
+#include "../frontend/frontend.h"
 
 #define UNDEF_VAR(node) \
 	fprintf(stderr, "An uninitialized variable was encountered: <%s>\n", node->name); \
@@ -22,6 +22,7 @@ const size_t VAR_COUNT  = 10000;
 const size_t FUNC_COUNT = 10000;
 const size_t POISON_PTR = 31415;
 
+enum RetValue {VOID, DOUBLE};
 struct Variable_t
 {
 	char*  name;
@@ -38,8 +39,10 @@ struct VarTable_t
 
 struct Func_t
 {
-	char*  name;
-	size_t  parCount;
+	char*    name;
+	size_t   parCount;
+	RetValue retVal;
+
 };
 
 struct Program_t
