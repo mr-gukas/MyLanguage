@@ -1,0 +1,28 @@
+#Armenian language
+#NAME: ARA
+#format: .ara
+
+krknaki main bac pag 
+barev
+	axper vova nshanakuma 0 verj
+	cardacek bac vova pag verj
+	axper vla nshanakuma fib bac vova pag verj
+	tpek bac vla pag verj
+
+	veradardz 0 verj
+ctesutyun
+
+krknaki fib bac num pag 
+barev
+	ete bac num pakas bac 12 hanats 10 pag pag aysdepkum
+	barev
+		axper sof nshanakuma num hanats 1 verj
+        axper fia nshanakuma num hanats 2 verj
+		veradardz bac fib bac sof pag gumarats fib bac fia pag pag verj
+	ctesutyun
+	hakarak
+	barev
+		veradardz 1 verj
+	ctesutyun verj
+ctesutyun
+
